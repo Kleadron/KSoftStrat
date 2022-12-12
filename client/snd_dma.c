@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -578,7 +579,10 @@ void S_IssuePlaysound (playsound_t *ps)
 
 	ch->pos = 0;
 	sc = S_LoadSound (ch->sfx);
-    ch->end = paintedtime + sc->length;
+
+	// No idea if this is an actual fix but this was coming up as null when I started the game sometimes.
+	if (sc != NULL)
+		ch->end = paintedtime + sc->length;
 
 	// free the playsound
 	S_FreePlaysound (ps);
