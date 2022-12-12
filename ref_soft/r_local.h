@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -512,9 +513,10 @@ extern int              r_screenwidth;
 
 extern int              r_drawnpolycount;
 
-extern int      sintable[1280];
-extern int      intsintable[1280];
-extern int		blanktable[1280];		// PGM
+#define SINTABLESIZE 4096
+extern int      sintable[SINTABLESIZE];
+extern int      intsintable[SINTABLESIZE];
+extern int		blanktable[SINTABLESIZE];		// PGM
 
 extern  vec3_t  vup, base_vup;
 extern  vec3_t  vpn, base_vpn;

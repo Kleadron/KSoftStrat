@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -49,8 +50,8 @@ void D_WarpScreen (void)
 	byte	**row;
 
 	static int	cached_width, cached_height;
-	static byte	*rowptr[1200+AMP2*2];
-	static int	column[1600+AMP2*2];
+	static byte	*rowptr[4096+AMP2*2];
+	static int	column[4096+AMP2*2];
 
 	//
 	// these are constant over resolutions, and can be saved

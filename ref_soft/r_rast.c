@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -44,9 +45,9 @@ qboolean		r_leftclipped, r_rightclipped;
 static qboolean	makeleftedge, makerightedge;
 qboolean		r_nearzionly;
 
-int		sintable[1280];
-int		intsintable[1280];
-int		blanktable[1280];		// PGM
+int		sintable[SINTABLESIZE];
+int		intsintable[SINTABLESIZE];
+int		blanktable[SINTABLESIZE];		// PGM
 
 mvertex_t	r_leftenter, r_leftexit;
 mvertex_t	r_rightenter, r_rightexit;
