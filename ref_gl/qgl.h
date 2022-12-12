@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -436,7 +437,15 @@ extern BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *pRed, 
 #define GL_SHARED_TEXTURE_PALETTE_EXT		0x81FB
 #endif
 
+// GL_SGIS_multitexture
 #define GL_TEXTURE0_SGIS					0x835E
 #define GL_TEXTURE1_SGIS					0x835F
+
+// GL_ARB_multitexture
+#define GL_TEXTURE0							0x84C0
+#define GL_TEXTURE1							0x84C1
+
+extern int qglTextureUnit0;
+extern int qglTextureUnit1;
 
 #endif

@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -739,7 +740,7 @@ dynamic:
 			R_BuildLightMap( surf, (void *)temp, smax*4 );
 			R_SetCacheState( surf );
 
-			GL_MBind( GL_TEXTURE1_SGIS, gl_state.lightmap_textures + surf->lightmaptexturenum );
+			GL_MBind( qglTextureUnit1, gl_state.lightmap_textures + surf->lightmaptexturenum );
 
 			lmtex = surf->lightmaptexturenum;
 
@@ -757,7 +758,7 @@ dynamic:
 
 			R_BuildLightMap( surf, (void *)temp, smax*4 );
 
-			GL_MBind( GL_TEXTURE1_SGIS, gl_state.lightmap_textures + 0 );
+			GL_MBind( qglTextureUnit1, gl_state.lightmap_textures + 0 );
 
 			lmtex = 0;
 
@@ -771,8 +772,8 @@ dynamic:
 
 		c_brush_polys++;
 
-		GL_MBind( GL_TEXTURE0_SGIS, image->texnum );
-		GL_MBind( GL_TEXTURE1_SGIS, gl_state.lightmap_textures + lmtex );
+		GL_MBind( qglTextureUnit0, image->texnum );
+		GL_MBind( qglTextureUnit1, gl_state.lightmap_textures + lmtex );
 
 //==========
 //PGM
@@ -790,8 +791,8 @@ dynamic:
 				qglBegin (GL_POLYGON);
 				for (i=0 ; i< nv; i++, v+= VERTEXSIZE)
 				{
-					qglMTexCoord2fSGIS( GL_TEXTURE0_SGIS, (v[3]+scroll), v[4]);
-					qglMTexCoord2fSGIS( GL_TEXTURE1_SGIS, v[5], v[6]);
+					qglMTexCoord2fSGIS( qglTextureUnit0, (v[3]+scroll), v[4]);
+					qglMTexCoord2fSGIS( qglTextureUnit1, v[5], v[6]);
 					qglVertex3fv (v);
 				}
 				qglEnd ();
@@ -805,8 +806,8 @@ dynamic:
 				qglBegin (GL_POLYGON);
 				for (i=0 ; i< nv; i++, v+= VERTEXSIZE)
 				{
-					qglMTexCoord2fSGIS( GL_TEXTURE0_SGIS, v[3], v[4]);
-					qglMTexCoord2fSGIS( GL_TEXTURE1_SGIS, v[5], v[6]);
+					qglMTexCoord2fSGIS( qglTextureUnit0, v[3], v[4]);
+					qglMTexCoord2fSGIS( qglTextureUnit1, v[5], v[6]);
 					qglVertex3fv (v);
 				}
 				qglEnd ();
@@ -819,8 +820,8 @@ dynamic:
 	{
 		c_brush_polys++;
 
-		GL_MBind( GL_TEXTURE0_SGIS, image->texnum );
-		GL_MBind( GL_TEXTURE1_SGIS, gl_state.lightmap_textures + lmtex );
+		GL_MBind( qglTextureUnit0, image->texnum );
+		GL_MBind( qglTextureUnit1, gl_state.lightmap_textures + lmtex );
 
 //==========
 //PGM
@@ -838,8 +839,8 @@ dynamic:
 				qglBegin (GL_POLYGON);
 				for (i=0 ; i< nv; i++, v+= VERTEXSIZE)
 				{
-					qglMTexCoord2fSGIS( GL_TEXTURE0_SGIS, (v[3]+scroll), v[4]);
-					qglMTexCoord2fSGIS( GL_TEXTURE1_SGIS, v[5], v[6]);
+					qglMTexCoord2fSGIS( qglTextureUnit0, (v[3]+scroll), v[4]);
+					qglMTexCoord2fSGIS( qglTextureUnit1, v[5], v[6]);
 					qglVertex3fv (v);
 				}
 				qglEnd ();
@@ -855,8 +856,8 @@ dynamic:
 				qglBegin (GL_POLYGON);
 				for (i=0 ; i< nv; i++, v+= VERTEXSIZE)
 				{
-					qglMTexCoord2fSGIS( GL_TEXTURE0_SGIS, v[3], v[4]);
-					qglMTexCoord2fSGIS( GL_TEXTURE1_SGIS, v[5], v[6]);
+					qglMTexCoord2fSGIS( qglTextureUnit0, v[3], v[4]);
+					qglMTexCoord2fSGIS( qglTextureUnit1, v[5], v[6]);
 					qglVertex3fv (v);
 				}
 				qglEnd ();
@@ -1006,9 +1007,9 @@ e->angles[0] = -e->angles[0];	// stupid quake bug
 e->angles[2] = -e->angles[2];	// stupid quake bug
 
 	GL_EnableMultitexture( true );
-	GL_SelectTexture( GL_TEXTURE0_SGIS );
+	GL_SelectTexture( qglTextureUnit0 );
 	GL_TexEnv( GL_REPLACE );
-	GL_SelectTexture( GL_TEXTURE1_SGIS );
+	GL_SelectTexture( qglTextureUnit1 );
 	GL_TexEnv( GL_MODULATE );
 
 	R_DrawInlineBModel ();
@@ -1220,9 +1221,9 @@ void R_DrawWorld (void)
 	{
 		GL_EnableMultitexture( true );
 
-		GL_SelectTexture( GL_TEXTURE0_SGIS );
+		GL_SelectTexture( qglTextureUnit0 );
 		GL_TexEnv( GL_REPLACE );
-		GL_SelectTexture( GL_TEXTURE1_SGIS );
+		GL_SelectTexture( qglTextureUnit1 );
 
 		if ( gl_lightmap->value )
 			GL_TexEnv( GL_REPLACE );
@@ -1570,7 +1571,7 @@ void GL_BeginBuildingLightmaps (model_t *m)
 	r_framecount = 1;		// no dlightcache
 
 	GL_EnableMultitexture( true );
-	GL_SelectTexture( GL_TEXTURE1_SGIS );
+	GL_SelectTexture( qglTextureUnit1 );
 
 	/*
 	** setup the base lightstyles so the lightmaps won't have to be regenerated

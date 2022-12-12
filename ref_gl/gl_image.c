@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -74,17 +75,17 @@ void GL_EnableMultitexture( qboolean enable )
 
 	if ( enable )
 	{
-		GL_SelectTexture( GL_TEXTURE1_SGIS );
+		GL_SelectTexture( qglTextureUnit1 );
 		qglEnable( GL_TEXTURE_2D );
 		GL_TexEnv( GL_REPLACE );
 	}
 	else
 	{
-		GL_SelectTexture( GL_TEXTURE1_SGIS );
+		GL_SelectTexture( qglTextureUnit1 );
 		qglDisable( GL_TEXTURE_2D );
 		GL_TexEnv( GL_REPLACE );
 	}
-	GL_SelectTexture( GL_TEXTURE0_SGIS );
+	GL_SelectTexture( qglTextureUnit0 );
 	GL_TexEnv( GL_REPLACE );
 }
 
@@ -95,7 +96,7 @@ void GL_SelectTexture( GLenum texture )
 	if ( !qglSelectTextureSGIS )
 		return;
 
-	if ( texture == GL_TEXTURE0_SGIS )
+	if ( texture == qglTextureUnit0 )
 		tmu = 0;
 	else
 		tmu = 1;
@@ -106,9 +107,9 @@ void GL_SelectTexture( GLenum texture )
 	gl_state.currenttmu = tmu;
 
 	if ( tmu == 0 )
-		qglSelectTextureSGIS( GL_TEXTURE0_SGIS );
+		qglSelectTextureSGIS( qglTextureUnit0 );
 	else
-		qglSelectTextureSGIS( GL_TEXTURE1_SGIS );
+		qglSelectTextureSGIS( qglTextureUnit1 );
 }
 
 void GL_TexEnv( GLenum mode )
@@ -137,7 +138,7 @@ void GL_Bind (int texnum)
 void GL_MBind( GLenum target, int texnum )
 {
 	GL_SelectTexture( target );
-	if ( target == GL_TEXTURE0_SGIS )
+	if ( target == qglTextureUnit0 )
 	{
 		if ( gl_state.currenttextures[0] == texnum )
 			return;

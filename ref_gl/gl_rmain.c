@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -1156,8 +1157,17 @@ int R_Init( void *hinstance, void *hWnd )
 	ri.Con_Printf (PRINT_ALL, "GL_RENDERER: %s\n", gl_config.renderer_string );
 	gl_config.version_string = qglGetString (GL_VERSION);
 	ri.Con_Printf (PRINT_ALL, "GL_VERSION: %s\n", gl_config.version_string );
+
+	// Print extensions
 	gl_config.extensions_string = qglGetString (GL_EXTENSIONS);
-	ri.Con_Printf (PRINT_ALL, "GL_EXTENSIONS: %s\n", gl_config.extensions_string );
+	if (strlen(gl_config.extensions_string) >= 4096)
+	{
+		ri.Con_Printf(PRINT_ALL, "GL_EXTENSIONS: Too many to print =[\n");
+	}
+	else
+	{
+		ri.Con_Printf(PRINT_ALL, "GL_EXTENSIONS: %s\n", gl_config.extensions_string);
+	}
 
 	strcpy( renderer_buffer, gl_config.renderer_string );
 	strlwr( renderer_buffer );
@@ -1302,22 +1312,40 @@ int R_Init( void *hinstance, void *hWnd )
 		ri.Con_Printf( PRINT_ALL, "...GL_EXT_shared_texture_palette not found\n" );
 	}
 
-	if ( strstr( gl_config.extensions_string, "GL_SGIS_multitexture" ) )
+	// check GL_SGIS_multitexture as well as GL_ARB_multitexture since it was renamed
+	if ( strstr( gl_config.extensions_string, "GL_SGIS_multitexture" ))
 	{
 		if ( gl_ext_multitexture->value )
 		{
 			ri.Con_Printf( PRINT_ALL, "...using GL_SGIS_multitexture\n" );
 			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMTexCoord2fSGIS" );
 			qglSelectTextureSGIS = ( void * ) qwglGetProcAddress( "glSelectTextureSGIS" );
+			qglTextureUnit0 = GL_TEXTURE0_SGIS;
+			qglTextureUnit1 = GL_TEXTURE1_SGIS;
 		}
 		else
 		{
 			ri.Con_Printf( PRINT_ALL, "...ignoring GL_SGIS_multitexture\n" );
 		}
 	}
+	else if (strstr(gl_config.extensions_string, "GL_ARB_multitexture"))
+	{
+		if (gl_ext_multitexture->value)
+		{
+			ri.Con_Printf(PRINT_ALL, "...using GL_ARB_multitexture\n");
+			qglMTexCoord2fSGIS = (void *)qwglGetProcAddress("glMultiTexCoord2fARB");
+			qglSelectTextureSGIS = (void *)qwglGetProcAddress("glActiveTextureARB");
+			qglTextureUnit0 = GL_TEXTURE0;
+			qglTextureUnit1 = GL_TEXTURE1;
+		}
+		else
+		{
+			ri.Con_Printf(PRINT_ALL, "...ignoring GL_ARB_multitexture\n");
+		}
+	}
 	else
 	{
-		ri.Con_Printf( PRINT_ALL, "...GL_SGIS_multitexture not found\n" );
+		ri.Con_Printf( PRINT_ALL, "...GL_SGIS_multitexture and GL_ARB_multitexture were not found\n" );
 	}
 #endif
 
