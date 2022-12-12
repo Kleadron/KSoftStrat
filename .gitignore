@@ -6,6 +6,7 @@
 baseq2/
 DebugAxp/
 ReleaseAxp/
+enc_temp_folder/
 
 # User-specific files
 *.rsuser
