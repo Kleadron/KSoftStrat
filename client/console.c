@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -583,8 +584,20 @@ void Con_DrawConsole (float frac)
 	if (lines > viddef.height)
 		lines = viddef.height;
 
-// draw the background
-	re.DrawStretchPic (0, -viddef.height+lines, viddef.width, viddef.height, "conback");
+	// blue: 124, 112
+	int mainColor = 2;
+	int borderColor1 = 211;
+	int borderColor2 = 213;
+
+	// === draw the background ===
+	//re.DrawStretchPic (0, -viddef.height+lines, viddef.width, viddef.height, "conback"); // og code
+	// main background fill
+	re.DrawFill(0, -viddef.height + lines, viddef.width, viddef.height-2, mainColor);
+	// border upper color
+	re.DrawFill(0, -viddef.height + lines + viddef.height-2, viddef.width, 1, borderColor1);
+	// border lower color
+	re.DrawFill(0, -viddef.height + lines + viddef.height-1, viddef.width, 1, borderColor2);
+
 	SCR_AddDirtyPoint (0,0);
 	SCR_AddDirtyPoint (viddef.width-1,lines-1);
 
