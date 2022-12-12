@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -341,6 +342,16 @@ LONG WINAPI MainWndProc (
 		// let sound and input know about this?
 		cl_hwnd = NULL;
         return DefWindowProc (hWnd, uMsg, wParam, lParam);
+
+	case WM_CLOSE:
+		cl_hwnd = NULL;
+
+		Com_Quit();
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+
+	case WM_SIZE:
+		// put some resizing code here maybe
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
 	case WM_ACTIVATE:
 		{
