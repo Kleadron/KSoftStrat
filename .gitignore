@@ -4,9 +4,13 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 baseq2/
+baseq2_backup/
+ksoft/
+ksoft_backup/
 DebugAxp/
 ReleaseAxp/
 enc_temp_folder/
+tools/
 
 # User-specific files
 *.rsuser
