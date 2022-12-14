@@ -864,6 +864,9 @@ void FS_InitFilesystem (void)
 	//
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_basedir->string) );
 
+	// quake is being annoying so fuck you
+	FS_AddGameDirectory(va("%s/ksoft", fs_basedir->string));
+
 	// any set gamedirs will be freed up to here
 	fs_base_searchpaths = fs_searchpaths;
 
