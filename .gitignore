@@ -12,6 +12,8 @@ ReleaseAxp/
 enc_temp_folder/
 tools/
 
+save/
+
 # User-specific files
 *.rsuser
 *.suo
