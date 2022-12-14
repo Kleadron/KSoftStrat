@@ -111,6 +111,7 @@ cvar_t  *gl_monolightmap;
 cvar_t	*gl_modulate;
 cvar_t	*gl_nobind;
 cvar_t	*gl_round_down;
+cvar_t	*gl_enforcepoweroftwo;
 cvar_t	*gl_picmip;
 cvar_t	*gl_skymip;
 cvar_t	*gl_showtris;
@@ -1001,6 +1002,7 @@ void R_Register( void )
 	gl_dynamic = ri.Cvar_Get ("gl_dynamic", "1", 0);
 	gl_nobind = ri.Cvar_Get ("gl_nobind", "0", 0);
 	gl_round_down = ri.Cvar_Get ("gl_round_down", "1", 0);
+	gl_enforcepoweroftwo = ri.Cvar_Get("gl_enforcepoweroftwo", "0", 0);
 	gl_picmip = ri.Cvar_Get ("gl_picmip", "0", 0);
 	gl_skymip = ri.Cvar_Get ("gl_skymip", "0", 0);
 	gl_showtris = ri.Cvar_Get ("gl_showtris", "0", 0);
@@ -1013,7 +1015,7 @@ void R_Register( void )
 	gl_playermip = ri.Cvar_Get ("gl_playermip", "0", 0);
 	gl_monolightmap = ri.Cvar_Get( "gl_monolightmap", "0", 0 );
 	gl_driver = ri.Cvar_Get( "gl_driver", "opengl32", CVAR_ARCHIVE );
-	gl_texturemode = ri.Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE );
+	gl_texturemode = ri.Cvar_Get( "gl_texturemode", "GL_NEAREST_MIPMAP_LINEAR", CVAR_ARCHIVE );
 	gl_texturealphamode = ri.Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
 	gl_texturesolidmode = ri.Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
 	gl_lockpvs = ri.Cvar_Get( "gl_lockpvs", "0", 0 );

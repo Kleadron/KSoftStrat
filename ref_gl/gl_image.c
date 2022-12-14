@@ -966,14 +966,22 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 
 	uploaded_paletted = false;
 
-	for (scaled_width = 1 ; scaled_width < width ; scaled_width<<=1)
-		;
-	if (gl_round_down->value && scaled_width > width && mipmap)
-		scaled_width >>= 1;
-	for (scaled_height = 1 ; scaled_height < height ; scaled_height<<=1)
-		;
-	if (gl_round_down->value && scaled_height > height && mipmap)
-		scaled_height >>= 1;
+	if (gl_enforcepoweroftwo->value)
+	{
+		for (scaled_width = 1; scaled_width < width; scaled_width <<= 1)
+			;
+		if (gl_round_down->value && scaled_width > width && mipmap)
+			scaled_width >>= 1;
+		for (scaled_height = 1; scaled_height < height; scaled_height <<= 1)
+			;
+		if (gl_round_down->value && scaled_height > height && mipmap)
+			scaled_height >>= 1;
+	} 
+	else
+	{ 
+		scaled_width = width;
+		scaled_height = height;
+	}
 
 	// let people sample down the world textures for speed
 	if (mipmap)
