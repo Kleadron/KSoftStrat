@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -433,6 +434,31 @@ void SCR_Init (void)
 	scr_initialized = true;
 }
 
+
+/*
+==============
+SCR_DrawTurtle
+==============
+*/
+void SCR_DrawTurtle (void)
+{
+	static int slowframes = 0;
+
+	if (!scr_showturtle->value)
+		return;
+
+	if (cls.frametime < 0.1)
+	{
+		slowframes = 0;
+		return;
+	}
+
+	slowframes++;
+	if (slowframes < 3)
+		return;
+
+	re.DrawPic(scr_vrect.x, scr_vrect.y, "turtle");
+}
 
 /*
 ==============
@@ -1379,6 +1405,7 @@ void SCR_UpdateScreen (void)
 			if (cl.frame.playerstate.stats[STAT_LAYOUTS] & 2)
 				CL_DrawInventory ();
 
+			SCR_DrawTurtle ();
 			SCR_DrawNet ();
 			SCR_CheckDrawCenterString ();
 
