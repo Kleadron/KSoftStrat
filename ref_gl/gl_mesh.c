@@ -750,6 +750,15 @@ void R_DrawAliasModel (entity_t *e)
 		skin = r_notexture;	// fallback...
 	GL_Bind(skin->texnum);
 
+	// setup texture half pixel offset for old models
+	if (gl_fixmodeluvs->value)
+	{
+		qglMatrixMode(GL_TEXTURE);
+		qglPushMatrix();
+		qglTranslatef(((1.0f / (float)skin->width)) * -0.5f, ((1.0f / (float)skin->height)) * -0.5f, 0.0f);
+		qglMatrixMode(GL_MODELVIEW);
+	}
+
 	// draw it
 
 	qglShadeModel (GL_SMOOTH);
@@ -834,6 +843,14 @@ void R_DrawAliasModel (entity_t *e)
 	}
 #endif
 	qglColor4f (1,1,1,1);
+
+	// turn off half pixel offset
+	if (gl_fixmodeluvs->value)
+	{
+		qglMatrixMode(GL_TEXTURE);
+		qglPopMatrix();
+		qglMatrixMode(GL_MODELVIEW);
+	}
 }
 
 

@@ -129,6 +129,8 @@ cvar_t	*gl_texturealphamode;
 cvar_t	*gl_texturesolidmode;
 cvar_t	*gl_lockpvs;
 
+cvar_t	*gl_fixmodeluvs;
+
 cvar_t	*gl_3dlabs_broken;
 
 cvar_t	*vid_fullscreen;
@@ -1019,6 +1021,8 @@ void R_Register( void )
 	gl_texturealphamode = ri.Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
 	gl_texturesolidmode = ri.Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
 	gl_lockpvs = ri.Cvar_Get( "gl_lockpvs", "0", 0 );
+
+	gl_fixmodeluvs = ri.Cvar_Get("gl_fixmodeluvs", "1", 0);
 
 	gl_vertex_arrays = ri.Cvar_Get( "gl_vertex_arrays", "0", CVAR_ARCHIVE );
 
