@@ -1076,6 +1076,7 @@ struct edict_s
 	edict_t		*activator;
 	edict_t		*groundentity;
 	int			groundentity_linkcount;
+	int			groundsurface_flags;
 	edict_t		*teamchain;
 	edict_t		*teammaster;
 

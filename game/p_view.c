@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -802,8 +803,24 @@ void G_SetClientEvent (edict_t *ent)
 
 	if ( ent->groundentity && xyspeed > 225)
 	{
-		if ( (int)(current_client->bobtime+bobmove) != bobcycle )
-			ent->s.event = EV_FOOTSTEP;
+		if ((int)(current_client->bobtime + bobmove) != bobcycle)
+		{
+			// footstep attempt
+			if ((ent->groundsurface_flags & SURF_SOIL))
+				ent->s.event = EV_FOOTSTEP_SOIL;
+			else if ((ent->groundsurface_flags & SURF_WOOD))
+				ent->s.event = EV_FOOTSTEP_WOOD;
+			else if ((ent->groundsurface_flags & SURF_ROCK))
+				ent->s.event = EV_FOOTSTEP_ROCK;
+			else if ((ent->groundsurface_flags & SURF_METAL))
+				ent->s.event = EV_FOOTSTEP_METAL;
+			else if ((ent->groundsurface_flags & SURF_LIQUID))
+				ent->s.event = EV_FOOTSTEP_LIQUID;
+			else if ((ent->groundsurface_flags & SURF_GLASS))
+				ent->s.event = EV_FOOTSTEP_GLASS;
+			else
+				ent->s.event = EV_FOOTSTEP;
+		}
 	}
 }
 

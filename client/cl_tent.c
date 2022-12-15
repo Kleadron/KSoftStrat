@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -95,6 +96,9 @@ struct sfx_s	*cl_sfx_watrexp;
 // RAFAEL
 struct sfx_s	*cl_sfx_plasexp;
 struct sfx_s	*cl_sfx_footsteps[4];
+struct sfx_s	*cl_sfx_footsteps_soil[4];
+struct sfx_s	*cl_sfx_footsteps_metal[4];
+struct sfx_s	*cl_sfx_footsteps_glass[5];
 
 struct model_s	*cl_mod_explode;
 struct model_s	*cl_mod_smoke;
@@ -152,6 +156,24 @@ void CL_RegisterTEntSounds (void)
 	{
 		Com_sprintf (name, sizeof(name), "player/step%i.wav", i+1);
 		cl_sfx_footsteps[i] = S_RegisterSound (name);
+	}
+
+	for (i = 0; i < 4; i++)
+	{
+		Com_sprintf(name, sizeof(name), "player/pl_dirt%i.wav", i + 1);
+		cl_sfx_footsteps_soil[i] = S_RegisterSound(name);
+	}
+
+	for (i = 0; i < 4; i++)
+	{
+		Com_sprintf(name, sizeof(name), "player/pl_metal%i.wav", i + 1);
+		cl_sfx_footsteps_metal[i] = S_RegisterSound(name);
+	}
+
+	for (i = 0; i < 5; i++)
+	{
+		Com_sprintf(name, sizeof(name), "player/pl_tile%i.wav", i + 1);
+		cl_sfx_footsteps_glass[i] = S_RegisterSound(name);
 	}
 
 //PGM

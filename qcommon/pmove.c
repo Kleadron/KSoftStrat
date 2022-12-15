@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -695,6 +696,11 @@ void PM_CatagorizePosition (void)
 		pml.groundsurface = trace.surface;
 		pml.groundcontents = trace.contents;
 
+		if (pml.groundsurface)
+			pm->groundsurface_flags = pml.groundsurface->flags;
+		else
+			pm->groundsurface_flags = 0;
+
 		if (!trace.ent || (trace.plane.normal[2] < 0.7 && !trace.startsolid) )
 		{
 			pm->groundentity = NULL;
@@ -714,6 +720,7 @@ void PM_CatagorizePosition (void)
 			if (! (pm->s.pm_flags & PMF_ON_GROUND) )
 			{	// just hit the ground
 				pm->s.pm_flags |= PMF_ON_GROUND;
+
 				// don't do landing time if we were just going down a slope
 				if (pml.velocity[2] < -200)
 				{

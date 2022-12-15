@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -2254,6 +2255,9 @@ the female events are there for backwards compatability
 ==============
 */
 extern struct sfx_s	*cl_sfx_footsteps[4];
+extern struct sfx_s	*cl_sfx_footsteps_soil[4];
+extern struct sfx_s	*cl_sfx_footsteps_metal[4];
+extern struct sfx_s	*cl_sfx_footsteps_glass[5];
 
 void CL_EntityEvent (entity_state_t *ent)
 {
@@ -2267,10 +2271,27 @@ void CL_EntityEvent (entity_state_t *ent)
 		S_StartSound (NULL, ent->number, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0);
 		CL_TeleportParticles (ent->origin);
 		break;
+
+
 	case EV_FOOTSTEP:
+	case EV_FOOTSTEP_ROCK:
 		if (cl_footsteps->value)
 			S_StartSound (NULL, ent->number, CHAN_BODY, cl_sfx_footsteps[rand()&3], 1, ATTN_NORM, 0);
 		break;
+	case EV_FOOTSTEP_SOIL:
+		if (cl_footsteps->value)
+			S_StartSound(NULL, ent->number, CHAN_BODY, cl_sfx_footsteps_soil[rand() & 3], 1, ATTN_NORM, 0);
+		break;
+	case EV_FOOTSTEP_METAL:
+		if (cl_footsteps->value)
+			S_StartSound(NULL, ent->number, CHAN_BODY, cl_sfx_footsteps_metal[rand() & 3], 1, ATTN_NORM, 0);
+		break;
+	case EV_FOOTSTEP_GLASS:
+		if (cl_footsteps->value)
+			S_StartSound(NULL, ent->number, CHAN_BODY, cl_sfx_footsteps_glass[rand() & 4], 1, ATTN_NORM, 0);
+		break;
+	
+
 	case EV_FALLSHORT:
 		S_StartSound (NULL, ent->number, CHAN_AUTO, S_RegisterSound ("player/land1.wav"), 1, ATTN_NORM, 0);
 		break;

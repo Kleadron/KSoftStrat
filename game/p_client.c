@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -1659,6 +1660,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ent->waterlevel = pm.waterlevel;
 		ent->watertype = pm.watertype;
 		ent->groundentity = pm.groundentity;
+		ent->groundsurface_flags = pm.groundsurface_flags;
 		if (pm.groundentity)
 			ent->groundentity_linkcount = pm.groundentity->linkcount;
 

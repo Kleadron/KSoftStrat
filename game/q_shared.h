@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2022 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -379,7 +380,16 @@ COLLISION DETECTION
 #define	SURF_TRANS66	0x20
 #define	SURF_FLOWING	0x40	// scroll towards angle
 #define	SURF_NODRAW		0x80	// don't bother referencing the texture
-
+// hidden bastards
+//#define SURF_HINT		0x100
+//#define SURF_SKIP		0x200
+// surface materials
+#define SURF_SOIL		0x400
+#define SURF_WOOD		0x800
+#define SURF_ROCK		0x1000
+#define SURF_METAL		0x2000
+#define SURF_LIQUID		0x4000
+#define SURF_GLASS		0x8000
 
 
 // content masks
@@ -537,6 +547,7 @@ typedef struct
 	vec3_t		mins, maxs;			// bounding box size
 
 	struct edict_s	*groundentity;
+	int			groundsurface_flags;
 	int			watertype;
 	int			waterlevel;
 
@@ -1122,7 +1133,13 @@ typedef enum
 {
 	EV_NONE,
 	EV_ITEM_RESPAWN,
-	EV_FOOTSTEP,
+	EV_FOOTSTEP,		// default footstep
+	EV_FOOTSTEP_SOIL,
+	EV_FOOTSTEP_WOOD,
+	EV_FOOTSTEP_ROCK,
+	EV_FOOTSTEP_METAL,
+	EV_FOOTSTEP_LIQUID,
+	EV_FOOTSTEP_GLASS,
 	EV_FALLSHORT,
 	EV_FALL,
 	EV_FALLFAR,
