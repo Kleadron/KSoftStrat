@@ -536,7 +536,21 @@ void P_FallingDamage (edict_t *ent)
 
 	if (delta < 15)
 	{
-		ent->s.event = EV_FOOTSTEP;
+		// should maybe make a function to determine this...
+		if ((ent->groundsurface_flags & SURF_SOIL))
+			ent->s.event = EV_FOOTSTEP_SOIL;
+		else if ((ent->groundsurface_flags & SURF_WOOD))
+			ent->s.event = EV_FOOTSTEP_WOOD;
+		else if ((ent->groundsurface_flags & SURF_ROCK))
+			ent->s.event = EV_FOOTSTEP_ROCK;
+		else if ((ent->groundsurface_flags & SURF_METAL))
+			ent->s.event = EV_FOOTSTEP_METAL;
+		else if ((ent->groundsurface_flags & SURF_LIQUID))
+			ent->s.event = EV_FOOTSTEP_LIQUID;
+		else if ((ent->groundsurface_flags & SURF_GLASS))
+			ent->s.event = EV_FOOTSTEP_GLASS;
+		else
+			ent->s.event = EV_FOOTSTEP;
 		return;
 	}
 
