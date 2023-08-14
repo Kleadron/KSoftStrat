@@ -294,7 +294,9 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 	if (ps->rdflags != ops->rdflags)
 		pflags |= PS_RDFLAGS;
 
-	if (ps->gunframe != ops->gunframe)
+	// The viewmodel bob offsets are updated only when the frame changes, this is kind of a problem.
+	// Sending this every frame like the weapon index is probably the best I can do.
+	//if (ps->gunframe != ops->gunframe)
 		pflags |= PS_WEAPONFRAME;
 
 	pflags |= PS_WEAPONINDEX;
