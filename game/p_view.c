@@ -359,22 +359,22 @@ void SV_CalcGunOffset (edict_t *ent)
 
 	ent->client->ps.gunangles[PITCH] = xyspeed * bobfracsin * 0.005;
 
-	// gun angles from delta movement
-	for (i=0 ; i<3 ; i++)
-	{
-		delta = ent->client->oldviewangles[i] - ent->client->ps.viewangles[i];
-		if (delta > 180)
-			delta -= 360;
-		if (delta < -180)
-			delta += 360;
-		if (delta > 45)
-			delta = 45;
-		if (delta < -45)
-			delta = -45;
-		if (i == YAW)
-			ent->client->ps.gunangles[ROLL] += 0.1*delta;
-		ent->client->ps.gunangles[i] += 0.2 * delta;
-	}
+	//// gun angles from delta movement
+	//for (i=0 ; i<3 ; i++)
+	//{
+	//	delta = ent->client->oldviewangles[i] - ent->client->ps.viewangles[i];
+	//	if (delta > 180)
+	//		delta -= 360;
+	//	if (delta < -180)
+	//		delta += 360;
+	//	if (delta > 45)
+	//		delta = 45;
+	//	if (delta < -45)
+	//		delta = -45;
+	//	if (i == YAW)
+	//		ent->client->ps.gunangles[ROLL] += 0.1*delta;
+	//	ent->client->ps.gunangles[i] += 0.2 * delta;
+	//}
 
 	// gun height
 	VectorClear (ent->client->ps.gunoffset);
@@ -815,7 +815,7 @@ void G_SetClientEvent (edict_t *ent)
 	if (ent->s.event)
 		return;
 
-	if ( ent->groundentity && xyspeed > 225)
+	if ( ent->groundentity && xyspeed > 175)
 	{
 		if ((int)(current_client->bobtime + bobmove) != bobcycle)
 		{
@@ -1051,7 +1051,7 @@ void ClientEndServerFrame (edict_t *ent)
 	}
 	else if (ent->groundentity)
 	{	// so bobbing only cycles when on ground
-		if (xyspeed > 210)
+		if (xyspeed > 175)
 			bobmove = 0.25;
 		else if (xyspeed > 100)
 			bobmove = 0.125;
@@ -1059,10 +1059,13 @@ void ClientEndServerFrame (edict_t *ent)
 			bobmove = 0.0625;
 	}
 	
+	// 20 tps compensation
+	bobmove *= 0.6f;
+
 	bobtime = (current_client->bobtime += bobmove);
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
-		bobtime *= 4;
+		bobtime *= 2;
 
 	bobcycle = (int)bobtime;
 	bobfracsin = fabs(sin(bobtime*M_PI));
@@ -1105,8 +1108,10 @@ void ClientEndServerFrame (edict_t *ent)
 	VectorCopy (ent->client->ps.viewangles, ent->client->oldviewangles);
 
 	// clear weapon kicks
-	VectorClear (ent->client->kick_origin);
-	VectorClear (ent->client->kick_angles);
+	//VectorClear (ent->client->kick_origin);
+	//VectorClear (ent->client->kick_angles);
+	VectorScale(ent->client->kick_origin, 1 - FRAMETIME * ent->client->kick_decay_speed, ent->client->kick_origin);
+	VectorScale(ent->client->kick_angles, 1 - FRAMETIME * ent->client->kick_decay_speed, ent->client->kick_angles);
 
 	// if the scoreboard is up, update it
 	if (ent->client->showscores && !(level.framenum & 31) )

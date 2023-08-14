@@ -71,7 +71,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define FL_RESPAWN				0x80000000	// used for item respawning
 
 
-#define	FRAMETIME		0.1
+#define	FRAMETIME		0.05
 
 // memory tags to allow dynamic memory to be cleaned up
 #define	TAG_GAME	765		// clear when unloading the dll
@@ -917,6 +917,7 @@ struct gclient_s
 	weaponstate_t	weaponstate;
 	vec3_t		kick_angles;	// weapon kicks
 	vec3_t		kick_origin;
+	vec_t		kick_decay_speed;
 	float		v_dmg_roll, v_dmg_pitch, v_dmg_time;	// damage kicks
 	float		fall_time, fall_value;		// for view drop on fall
 	float		damage_alpha;

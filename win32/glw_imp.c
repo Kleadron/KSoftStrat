@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2023 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -35,6 +36,49 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../ref_gl/gl_local.h"
 #include "glw_win.h"
 #include "winquake.h"
+
+
+// DWM stuff for vista+
+BOOL hasDWM;
+typedef HRESULT(WINAPI *DWMFUNC1)(BOOL *pfEnabled);
+typedef HRESULT(WINAPI *DWMFUNC2)();
+DWMFUNC1 p_fDwmIsCompositionEnabled;
+DWMFUNC2 p_fDwmFlush;
+
+void LinkDwm()
+{
+	HMODULE dwmapiLib = LoadLibraryA("dwmapi.dll");
+
+	if (dwmapiLib != NULL)
+	{
+		OutputDebugStringA("Found dwmapi.dll, vsync will sync to compositor.\n");
+		p_fDwmIsCompositionEnabled = (DWMFUNC1)GetProcAddress(dwmapiLib, "DwmIsCompositionEnabled");
+		p_fDwmFlush = (DWMFUNC2)GetProcAddress(dwmapiLib, "DwmFlush");
+		hasDWM = true;
+	}
+	else
+	{
+		OutputDebugStringA("No dwmapi.dll, vsync will sync to monitor.\n");
+		hasDWM = false;
+	}
+}
+
+BOOL DwmIsCompositionEnabled()
+{
+	BOOL enabled = FALSE;
+
+	if (hasDWM)
+		p_fDwmIsCompositionEnabled(&enabled);
+
+	return enabled;
+}
+
+void DwmFlush()
+{
+	if (hasDWM)
+		p_fDwmFlush();
+}
+
 
 static qboolean GLimp_SwitchFullscreen( int width, int height );
 qboolean GLimp_InitGL (void);
@@ -384,6 +428,8 @@ qboolean GLimp_Init( void *hinstance, void *wndproc )
 	glw_state.hInstance = ( HINSTANCE ) hinstance;
 	glw_state.wndproc = wndproc;
 
+	LinkDwm();
+
 	return true;
 }
 
@@ -595,6 +641,9 @@ void GLimp_EndFrame (void)
 	{
 		if ( !qwglSwapBuffers( glw_state.hDC ) )
 			ri.Sys_Error( ERR_FATAL, "GLimp_EndFrame() - SwapBuffers() failed!\n" );
+
+		if (DwmIsCompositionEnabled())
+			DwmFlush();
 	}
 }
 

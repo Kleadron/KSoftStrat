@@ -723,7 +723,8 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+	ent->client->kick_angles[0] = -5;
+	ent->client->kick_decay_speed = 5;
 
 	fire_grenade (ent, start, forward, damage, 600, 2.5, radius);
 
@@ -776,7 +777,8 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+	ent->client->kick_angles[0] = -5;
+	ent->client->kick_decay_speed = 7;
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -827,7 +829,8 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+	ent->client->kick_angles[0] = -3;
+	ent->client->kick_decay_speed = 7;
 
 	fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
 
@@ -996,15 +999,16 @@ void Machinegun_Fire (edict_t *ent)
 		ent->client->kick_angles[i] = crandom() * 0.7;
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
-	ent->client->kick_angles[0] = ent->client->machinegun_shots * -1.5;
+	ent->client->kick_angles[0] = -1.5;
+	ent->client->kick_decay_speed = 5;
 
 	// raise the gun as it is firing
-	if (!deathmatch->value)
-	{
-		ent->client->machinegun_shots++;
-		if (ent->client->machinegun_shots > 9)
-			ent->client->machinegun_shots = 9;
-	}
+	//if (!deathmatch->value)
+	//{
+	//	ent->client->machinegun_shots++;
+	//	if (ent->client->machinegun_shots > 9)
+	//		ent->client->machinegun_shots = 9;
+	//}
 
 	// get start / end positions
 	VectorAdd (ent->client->v_angle, ent->client->kick_angles, angles);
@@ -1039,9 +1043,9 @@ void Machinegun_Fire (edict_t *ent)
 void Weapon_Machinegun (edict_t *ent)
 {
 	static int	pause_frames[]	= {23, 45, 0};
-	static int	fire_frames[]	= {4, 5, 0};
+	static int	fire_frames[]	= {4, 6, 0};
 
-	Weapon_Generic (ent, 3, 5, 45, 49, pause_frames, fire_frames, Machinegun_Fire);
+	Weapon_Generic (ent, 3, 6, 45, 49, pause_frames, fire_frames, Machinegun_Fire);
 }
 
 void Chaingun_Fire (edict_t *ent)
@@ -1139,6 +1143,8 @@ void Chaingun_Fire (edict_t *ent)
 		ent->client->kick_angles[i] = crandom() * 0.7;
 	}
 
+	ent->client->kick_decay_speed = 7;
+
 	for (i=0 ; i<shots ; i++)
 	{
 		// get start / end positions
@@ -1198,7 +1204,8 @@ void weapon_shotgun_fire (edict_t *ent)
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -2;
+	ent->client->kick_angles[0] = -4;
+	ent->client->kick_decay_speed = 7;
 
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1248,7 +1255,8 @@ void weapon_supershotgun_fire (edict_t *ent)
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -2;
+	ent->client->kick_angles[0] = -8;
+	ent->client->kick_decay_speed = 4;
 
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1328,6 +1336,7 @@ void weapon_railgun_fire (edict_t *ent)
 
 	VectorScale (forward, -3, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -3;
+	ent->client->kick_decay_speed = 7;
 
 	VectorSet(offset, 0, 7,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1404,6 +1413,7 @@ void weapon_bfg_fire (edict_t *ent)
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
+	ent->client->kick_decay_speed = 7;
 
 	// make a big pitch kick with an inverse fall
 	ent->client->v_dmg_pitch = -40;

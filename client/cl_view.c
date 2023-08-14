@@ -377,6 +377,23 @@ float CalcFov (float fov_x, float width, float height)
 	return a;
 }
 
+float CalcFovOpposite(float fov_y, float width, float height)
+{
+	float	a;
+	float	y;
+
+	if (fov_y < 1 || fov_y > 179)
+		Com_Error(ERR_DROP, "Bad fov: %f", fov_y);
+
+	y = height / tan(fov_y / 360 * M_PI);
+
+	a = atan(width / y);
+
+	a = a * 360 / M_PI;
+
+	return a;
+}
+
 //============================================================================
 
 // gun frame debugging functions
@@ -503,7 +520,7 @@ void V_RenderView( float stereo_separation )
 		cl.refdef.y = scr_vrect.y;
 		cl.refdef.width = scr_vrect.width;
 		cl.refdef.height = scr_vrect.height;
-		cl.refdef.fov_y = CalcFov (cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
+		cl.refdef.fov_x = CalcFovOpposite (cl.refdef.fov_y, cl.refdef.width, cl.refdef.height);
 		cl.refdef.time = cl.time*0.001;
 
 		cl.refdef.areabits = cl.frame.areabits;

@@ -674,7 +674,7 @@ void CL_ParseFrame (void)
 
 	cl.frame.serverframe = MSG_ReadLong (&net_message);
 	cl.frame.deltaframe = MSG_ReadLong (&net_message);
-	cl.frame.servertime = cl.frame.serverframe*100;
+	cl.frame.servertime = cl.frame.serverframe*50;
 
 	// BIG HACK to let old demos continue to work
 	if (cls.serverProtocol != 26)
@@ -717,8 +717,8 @@ void CL_ParseFrame (void)
 	// clamp time 
 	if (cl.time > cl.frame.servertime)
 		cl.time = cl.frame.servertime;
-	else if (cl.time < cl.frame.servertime - 100)
-		cl.time = cl.frame.servertime - 100;
+	else if (cl.time < cl.frame.servertime - 50)
+		cl.time = cl.frame.servertime - 50;
 
 	// read areabits
 	len = MSG_ReadByte (&net_message);
@@ -1294,6 +1294,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 {
 	entity_t	gun;		// view model
 	int			i;
+	float		delta;
 
 	// allow the gun to be completely removed
 	if (!cl_gun->value)
@@ -1319,6 +1320,24 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			+ cl.lerpfrac * (ps->gunoffset[i] - ops->gunoffset[i]);
 		gun.angles[i] = cl.refdef.viewangles[i] + LerpAngle (ops->gunangles[i],
 			ps->gunangles[i], cl.lerpfrac);
+	}
+
+	// gun angles from delta movement
+	for (i = 0; i < 3; i++)
+	{
+		delta = LerpAngle(ops->viewangles[i],
+			ps->viewangles[i], cl.lerpfrac) - cl.refdef.viewangles[i]; //ent->client->oldviewangles[i] - ent->client->ps.viewangles[i];
+		if (delta > 180)
+			delta -= 360;
+		if (delta < -180)
+			delta += 360;
+		if (delta > 45)
+			delta = 45;
+		if (delta < -45)
+			delta = -45;
+		if (i == YAW)
+			gun.angles[ROLL] += 0.1*delta;
+		gun.angles[i] += 0.2 * delta;
 	}
 
 	if (gun_frame)
@@ -1419,6 +1438,7 @@ void CL_CalcViewValues (void)
 
 	// interpolate field of view
 	cl.refdef.fov_x = ops->fov + lerp * (ps->fov - ops->fov);
+	cl.refdef.fov_y = ops->fov + lerp * (ps->fov - ops->fov);
 
 	// don't interpolate blend color
 	for (i=0 ; i<4 ; i++)
@@ -1447,15 +1467,15 @@ void CL_AddEntities (void)
 		cl.time = cl.frame.servertime;
 		cl.lerpfrac = 1.0;
 	}
-	else if (cl.time < cl.frame.servertime - 100)
+	else if (cl.time < cl.frame.servertime - 50)
 	{
 		if (cl_showclamp->value)
-			Com_Printf ("low clamp %i\n", cl.frame.servertime-100 - cl.time);
-		cl.time = cl.frame.servertime - 100;
+			Com_Printf ("low clamp %i\n", cl.frame.servertime-50 - cl.time);
+		cl.time = cl.frame.servertime - 50;
 		cl.lerpfrac = 0;
 	}
 	else
-		cl.lerpfrac = 1.0 - (cl.frame.servertime - cl.time) * 0.01;
+		cl.lerpfrac = 1.0 - ((float)(cl.frame.servertime - cl.time) / 50.0f);
 
 	if (cl_timedemo->value)
 		cl.lerpfrac = 1.0;

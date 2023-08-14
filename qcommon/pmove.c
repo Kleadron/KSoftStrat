@@ -52,9 +52,9 @@ pml_t		pml;
 
 // movement parameters
 float	pm_stopspeed = 100;
-float	pm_maxspeed = 300;
+float	pm_maxspeed = 200;
 float	pm_duckspeed = 100;
-float	pm_accelerate = 10;
+float	pm_accelerate = 7;
 float	pm_airaccelerate = 0;
 float	pm_wateraccelerate = 10;
 float	pm_friction = 6;

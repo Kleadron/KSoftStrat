@@ -730,7 +730,7 @@ void SV_RunGameFrame (void)
 	// compression can get confused when a client
 	// has the "current" frame
 	sv.framenum++;
-	sv.time = sv.framenum*100;
+	sv.time = sv.framenum*50;
 
 	// don't run if paused
 	if (!sv_paused->value || maxclients->value > 1)
@@ -780,11 +780,11 @@ void SV_Frame (int msec)
 	if (!sv_timedemo->value && svs.realtime < sv.time)
 	{
 		// never let the time get too far off
-		if (sv.time - svs.realtime > 100)
+		if (sv.time - svs.realtime > 50)
 		{
 			if (sv_showclamp->value)
 				Com_Printf ("sv lowclamp\n");
-			svs.realtime = sv.time - 100;
+			svs.realtime = sv.time - 50;
 		}
 		NET_Sleep(sv.time - svs.realtime);
 		return;
