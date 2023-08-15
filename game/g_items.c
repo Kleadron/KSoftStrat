@@ -1295,7 +1295,7 @@ always owned, never in the world
 		NULL,
 		Weapon_Blaster,
 		"misc/w_pkup.wav",
-		NULL, 0,
+		"models/weapons/g_blast/tris.md2", EF_ROTATE,
 		"models/weapons/v_blast/tris.md2",
 /* icon */		"w_blaster",
 /* pickup */	"Blaster",
