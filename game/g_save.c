@@ -190,9 +190,9 @@ void InitGame (void)
 
 	run_pitch = gi.cvar ("run_pitch", "0.002", 0);
 	run_roll = gi.cvar ("run_roll", "0.005", 0);
-	bob_up  = gi.cvar ("bob_up", "0.005", 0);
-	bob_pitch = gi.cvar ("bob_pitch", "0.002", 0);
-	bob_roll = gi.cvar ("bob_roll", "0.002", 0);
+	bob_up  = gi.cvar ("bob_up", "0.010", 0);
+	bob_pitch = gi.cvar ("bob_pitch", "0.004", 0);
+	bob_roll = gi.cvar ("bob_roll", "0.004", 0);
 
 	// flood control
 	flood_msgs = gi.cvar ("flood_msgs", "4", 0);
