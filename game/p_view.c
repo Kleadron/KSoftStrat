@@ -815,7 +815,7 @@ void G_SetClientEvent (edict_t *ent)
 	if (ent->s.event)
 		return;
 
-	if ( ent->groundentity && xyspeed > 175)
+	if ( ent->groundentity && xyspeed > 150)
 	{
 		if ((int)(current_client->bobtime + bobmove) != bobcycle)
 		{
@@ -1051,8 +1051,8 @@ void ClientEndServerFrame (edict_t *ent)
 	}
 	else if (ent->groundentity)
 	{	// so bobbing only cycles when on ground
-		if (xyspeed > 175)
-			bobmove = 0.25;
+		if (xyspeed > 150)
+			bobmove = 0.22;
 		else if (xyspeed > 100)
 			bobmove = 0.125;
 		else
