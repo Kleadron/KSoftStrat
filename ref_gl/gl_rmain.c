@@ -1461,7 +1461,7 @@ void R_BeginFrame( float camera_separation )
 	/*
 	** go into 2D mode
 	*/
-	qglViewport (0,0, vid.width, vid.height);
+	/*qglViewport (0,0, vid.width, vid.height);
 	qglMatrixMode(GL_PROJECTION);
     qglLoadIdentity ();
 	qglOrtho  (0, vid.width, vid.height, 0, -99999, 99999);
@@ -1471,7 +1471,9 @@ void R_BeginFrame( float camera_separation )
 	qglDisable (GL_CULL_FACE);
 	qglDisable (GL_BLEND);
 	qglEnable (GL_ALPHA_TEST);
-	qglColor4f (1,1,1,1);
+	qglColor4f (1,1,1,1);*/
+	// was this code just duplicated?
+	R_SetGL2D();
 
 	/*
 	** draw buffer stuff
