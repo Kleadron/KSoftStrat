@@ -141,6 +141,20 @@ void VID_CreateWindow(int width, int height, int stylebits)
 	if (!sww_state.hWnd)
 		ri.Sys_Error(ERR_FATAL, "Couldn't create window");
 
+	RECT desk;
+	GetWindowRect(sww_state.hWnd, &r);
+	GetWindowRect(GetDesktopWindow(), &desk);
+
+	int wa, ha, wb, hb;
+
+	wa = (r.right - r.left) / 2;
+	ha = (r.bottom - r.top) / 2;
+
+	wb = (desk.right - desk.left) / 2;
+	hb = (desk.bottom - desk.top) / 2;
+
+	SetWindowPos(sww_state.hWnd, NULL, wb - wa, hb - ha, r.right - r.left, r.bottom - r.top, 0);
+
 	ShowWindow(sww_state.hWnd, SW_SHOWNORMAL);
 	UpdateWindow(sww_state.hWnd);
 	SetForegroundWindow(sww_state.hWnd);

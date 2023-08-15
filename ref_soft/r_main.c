@@ -1347,6 +1347,16 @@ void Draw_GetPalette (void)
 
 struct image_s *R_RegisterSkin (char *name);
 
+void SWimp_WindowResize(int width, int height)
+{
+	vid.width = width;
+	vid.height = height;
+
+	R_InitGraphics(width, height);
+
+
+}
+
 /*
 @@@@@@@@@@@@@@@@@@@@@
 GetRefAPI
@@ -1388,6 +1398,7 @@ refexport_t GetRefAPI (refimport_t rimp)
 	re.EndFrame = SWimp_EndFrame;
 
 	re.AppActivate = SWimp_AppActivate;
+	re.WindowResize = SWimp_WindowResize;
 
 	Swap_Init ();
 

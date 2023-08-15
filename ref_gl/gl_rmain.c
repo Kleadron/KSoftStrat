@@ -1649,6 +1649,12 @@ void	Draw_TileClear (int x, int y, int w, int h, char *name);
 void	Draw_Fill (int x, int y, int w, int h, int c);
 void	Draw_FadeScreen (void);
 
+void GLimp_WindowResize(int width, int height)
+{
+	vid.width = width;
+	vid.height = height;
+}
+
 /*
 @@@@@@@@@@@@@@@@@@@@@
 GetRefAPI
@@ -1690,6 +1696,7 @@ refexport_t GetRefAPI (refimport_t rimp )
 	re.EndFrame = GLimp_EndFrame;
 
 	re.AppActivate = GLimp_AppActivate;
+	re.WindowResize = GLimp_WindowResize;
 
 	Swap_Init ();
 

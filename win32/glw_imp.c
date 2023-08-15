@@ -176,6 +176,20 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 
 	if (!glw_state.hWnd)
 		ri.Sys_Error (ERR_FATAL, "Couldn't create window");
+
+	RECT desk;
+	GetWindowRect(glw_state.hWnd, &r);
+	GetWindowRect(GetDesktopWindow(), &desk);
+
+	int wa, ha, wb, hb;
+
+	wa = (r.right - r.left) / 2;
+	ha = (r.bottom - r.top) / 2;
+
+	wb = (desk.right - desk.left) / 2;
+	hb = (desk.bottom - desk.top) / 2;
+
+	SetWindowPos(glw_state.hWnd, NULL, wb - wa, hb - ha, r.right - r.left, r.bottom - r.top, 0);
 	
 	ShowWindow( glw_state.hWnd, SW_SHOW );
 	UpdateWindow( glw_state.hWnd );

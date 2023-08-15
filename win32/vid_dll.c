@@ -350,8 +350,18 @@ LONG WINAPI MainWndProc (
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
 	case WM_SIZE:
-		// put some resizing code here maybe
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		{
+			// put some resizing code here maybe
+			int width = LOWORD(lParam);
+			int height = HIWORD(lParam);
+
+			viddef.width = width;
+			viddef.height = height;
+			cl.force_refdef = true;		// can't use a paused refdef
+
+			re.WindowResize(width, height);
+		}
+		return 0;
 
 	case WM_ACTIVATE:
 		{

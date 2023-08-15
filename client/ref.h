@@ -181,6 +181,9 @@ typedef struct
 
 	void	(*AppActivate)( qboolean activate );
 
+	// new
+	void	(*WindowResize) (int width, int height);
+
 } refexport_t;
 
 //
