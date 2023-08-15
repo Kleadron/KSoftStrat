@@ -668,12 +668,19 @@ void GLimp_AppActivate( qboolean active )
 {
 	if ( active )
 	{
-		SetForegroundWindow( glw_state.hWnd );
-		ShowWindow( glw_state.hWnd, SW_RESTORE );
+		// Kleadron: I think this only needs to be done in fullscreen. 
+		// Windows already sets it as foreground and shows it, so I think that's redundant.
+		if (vid_fullscreen->value)
+		{
+			SetForegroundWindow(glw_state.hWnd);
+			ShowWindow(glw_state.hWnd, SW_RESTORE);
+		}
 	}
 	else
 	{
-		if ( vid_fullscreen->value )
-			ShowWindow( glw_state.hWnd, SW_MINIMIZE );
+		if (vid_fullscreen->value)
+		{
+			ShowWindow(glw_state.hWnd, SW_MINIMIZE);
+		}
 	}
 }
