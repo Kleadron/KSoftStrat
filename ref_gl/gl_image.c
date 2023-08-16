@@ -1509,7 +1509,14 @@ void	GL_InitImages (void)
 	registration_sequence = 1;
 
 	// init intensity conversions
-	intensity = ri.Cvar_Get ("intensity", "2", 0);
+	//intensity = ri.Cvar_Get ("intensity", "2", 0);
+	// Vic - begin
+	if (gl_config.mtexcombine)
+		intensity = ri.Cvar_Get("intensity", "1", 0);
+	else
+		intensity = ri.Cvar_Get("intensity", "2", 0);
+	// Vic - end
+
 
 	if ( intensity->value <= 1 )
 		ri.Cvar_Set( "intensity", "1" );
