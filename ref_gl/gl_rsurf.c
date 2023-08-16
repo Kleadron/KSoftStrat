@@ -1262,7 +1262,8 @@ void R_DrawWorld (void)
 	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
 	R_ClearSkyBox ();
 
-	if ( qglMTexCoord2fSGIS )
+	// if there's no lightdata don't render with multitexture
+	if ( r_worldmodel->lightdata && qglMTexCoord2fSGIS )
 	{
 		GL_EnableMultitexture( true );
 

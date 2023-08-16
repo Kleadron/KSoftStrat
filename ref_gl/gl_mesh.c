@@ -763,7 +763,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	qglShadeModel (GL_SMOOTH);
 
-	if (!gl_config.mtexcombine)
+	if (!r_worldmodel->lightdata || !gl_config.mtexcombine)
 	{
 		GL_TexEnv(GL_MODULATE);
 	}
@@ -813,7 +813,7 @@ void R_DrawAliasModel (entity_t *e)
 		currententity->backlerp = 0;
 	GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp);
 
-	if (gl_config.mtexcombine)
+	if (r_worldmodel->lightdata && gl_config.mtexcombine)
 	{
 		GL_TexEnv(GL_MODULATE);
 
