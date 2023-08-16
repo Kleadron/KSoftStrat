@@ -347,7 +347,8 @@ void Think_AccelMove (edict_t *ent)
 		return;
 	}
 
-	VectorScale (ent->moveinfo.dir, ent->moveinfo.current_speed*10, ent->velocity);
+	// somehow this is tickrate dependent - changed from 10 to 20
+	VectorScale (ent->moveinfo.dir, ent->moveinfo.current_speed*20, ent->velocity);
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = Think_AccelMove;
 }
