@@ -763,10 +763,31 @@ void R_DrawAliasModel (entity_t *e)
 
 	qglShadeModel (GL_SMOOTH);
 
-	GL_TexEnv( GL_MODULATE );
-	if ( currententity->flags & RF_TRANSLUCENT )
+	if (!gl_config.mtexcombine)
 	{
-		qglEnable (GL_BLEND);
+		GL_TexEnv(GL_MODULATE);
+	}
+	else
+	{
+		GL_TexEnv(GL_COMBINE_EXT);
+
+		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT);
+		if (r_overbrightbits->value)
+		{
+			qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value);
+		}
+
+		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 1);
+	}
+
+	if (currententity->flags & RF_TRANSLUCENT)
+	{
+		qglEnable(GL_BLEND);
 	}
 
 
@@ -791,6 +812,14 @@ void R_DrawAliasModel (entity_t *e)
 	if ( !r_lerpmodels->value )
 		currententity->backlerp = 0;
 	GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp);
+
+	if (gl_config.mtexcombine)
+	{
+		GL_TexEnv(GL_MODULATE);
+
+		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 1);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 1);
+	}
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);

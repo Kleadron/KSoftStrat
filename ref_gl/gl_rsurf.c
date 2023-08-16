@@ -1008,9 +1008,54 @@ e->angles[2] = -e->angles[2];	// stupid quake bug
 
 	GL_EnableMultitexture( true );
 	GL_SelectTexture( qglTextureUnit0 );
-	GL_TexEnv( GL_REPLACE );
-	GL_SelectTexture( qglTextureUnit1 );
-	GL_TexEnv( GL_MODULATE );
+	//GL_TexEnv( GL_REPLACE );
+	//GL_SelectTexture( qglTextureUnit1 );
+	//GL_TexEnv( GL_MODULATE );
+	// Vic - begin
+	if (!gl_config.mtexcombine) 
+	{
+		GL_TexEnv(GL_REPLACE);
+		GL_SelectTexture(qglTextureUnit1);
+
+		if (gl_lightmap->value)
+			GL_TexEnv(GL_REPLACE);
+		else
+			GL_TexEnv(GL_MODULATE);
+	}
+	else 
+	{
+		GL_TexEnv(GL_COMBINE_EXT);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+		GL_SelectTexture(qglTextureUnit1);
+		GL_TexEnv(GL_COMBINE_EXT);
+
+		if (gl_lightmap->value) 
+		{
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+		}
+		else 
+		{
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT);
+
+		}
+
+		if (r_overbrightbits->value) 
+		{
+			qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value);
+		}
+	}
+	// Vic - end
 
 	R_DrawInlineBModel ();
 	GL_EnableMultitexture( false );
@@ -1222,13 +1267,58 @@ void R_DrawWorld (void)
 		GL_EnableMultitexture( true );
 
 		GL_SelectTexture( qglTextureUnit0 );
-		GL_TexEnv( GL_REPLACE );
+		/*GL_TexEnv( GL_REPLACE );
 		GL_SelectTexture( qglTextureUnit1 );
 
 		if ( gl_lightmap->value )
 			GL_TexEnv( GL_REPLACE );
 		else 
-			GL_TexEnv( GL_MODULATE );
+			GL_TexEnv( GL_MODULATE );*/
+
+		// Vic - begin
+		if (!gl_config.mtexcombine)
+		{
+			GL_TexEnv(GL_REPLACE);
+			GL_SelectTexture(qglTextureUnit1);
+
+			if (gl_lightmap->value)
+				GL_TexEnv(GL_REPLACE);
+			else
+				GL_TexEnv(GL_MODULATE);
+		}
+		else 
+		{
+			GL_TexEnv(GL_COMBINE_EXT);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+			GL_SelectTexture(qglTextureUnit1);
+			GL_TexEnv(GL_COMBINE_EXT);
+
+			if (gl_lightmap->value) 
+			{
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+			}
+			else 
+			{
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT);
+			}
+
+			if (r_overbrightbits->value) 
+			{
+				qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value);
+			}
+		}
+		// Vic - end
 
 		R_RecursiveWorldNode (r_worldmodel->nodes);
 

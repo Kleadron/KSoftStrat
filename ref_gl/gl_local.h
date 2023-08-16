@@ -186,8 +186,14 @@ extern	cvar_t	*r_nocull;
 extern	cvar_t	*r_lerpmodels;
 
 extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
+// Vic - begin
+extern cvar_t	*r_overbrightbits;
+// Vic - end
 
 extern cvar_t	*gl_vertex_arrays;
+// Vic - begin
+extern cvar_t	*gl_ext_mtexcombine;
+// Vic - end
 
 extern cvar_t	*gl_ext_swapinterval;
 extern cvar_t	*gl_ext_palettedtexture;
@@ -407,6 +413,9 @@ typedef struct
 	const char *extensions_string;
 
 	qboolean	allow_cds;
+	// Vic - begin
+	qboolean 	mtexcombine;
+	// Vic - end
 } glconfig_t;
 
 typedef struct

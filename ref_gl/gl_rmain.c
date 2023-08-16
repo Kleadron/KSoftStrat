@@ -80,6 +80,9 @@ cvar_t	*r_lerpmodels;
 cvar_t	*r_lefthand;
 
 cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
+// Vic - begin
+cvar_t	*r_overbrightbits;
+// Vic - end
 
 cvar_t	*gl_nosubimage;
 cvar_t	*gl_allow_software;
@@ -98,6 +101,9 @@ cvar_t	*gl_ext_palettedtexture;
 cvar_t	*gl_ext_multitexture;
 cvar_t	*gl_ext_pointparameters;
 cvar_t	*gl_ext_compiled_vertex_array;
+// Vic - begin
+cvar_t	*gl_ext_mtexcombine;
+// Vic - end
 
 cvar_t	*gl_log;
 cvar_t	*gl_bitdepth;
@@ -1032,6 +1038,11 @@ void R_Register( void )
 	gl_ext_pointparameters = ri.Cvar_Get( "gl_ext_pointparameters", "1", CVAR_ARCHIVE );
 	gl_ext_compiled_vertex_array = ri.Cvar_Get( "gl_ext_compiled_vertex_array", "1", CVAR_ARCHIVE );
 
+	// Vic - begin
+	r_overbrightbits = ri.Cvar_Get("r_overbrightbits", "2", CVAR_ARCHIVE);
+	gl_ext_mtexcombine = ri.Cvar_Get("gl_ext_mtexcombine", "1", CVAR_ARCHIVE);
+	// Vic - end
+
 	gl_drawbuffer = ri.Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
 	gl_swapinterval = ri.Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
 
@@ -1353,6 +1364,47 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		ri.Con_Printf( PRINT_ALL, "...GL_SGIS_multitexture and GL_ARB_multitexture were not found\n" );
 	}
+
+	// Vic - begin
+	gl_config.mtexcombine = false;
+
+	if (strstr(gl_config.extensions_string, "GL_ARB_texture_env_combine"))
+	{
+		if (gl_ext_mtexcombine->value)
+		{
+			Com_Printf("...using GL_ARB_texture_env_combine\n");
+			gl_config.mtexcombine = true;
+		}
+		else
+		{
+			Com_Printf("...ignoring GL_ARB_texture_env_combine\n");
+		}
+	}
+	else
+	{
+		Com_Printf("...GL_ARB_texture_env_combine not found\n");
+	}
+
+	if (!gl_config.mtexcombine)
+	{
+		if (strstr(gl_config.extensions_string, "GL_EXT_texture_env_combine"))
+		{
+			if (gl_ext_mtexcombine->value)
+			{
+				Com_Printf("...using GL_EXT_texture_env_combine\n");
+				gl_config.mtexcombine = true;
+			}
+			else
+			{
+				Com_Printf("...ignoring GL_EXT_texture_env_combine\n");
+			}
+		}
+		else
+		{
+			Com_Printf("...GL_EXT_texture_env_combine not found\n");
+		}
+	}
+	// Vic - end
 #endif
 
 	GL_SetDefaultState();
