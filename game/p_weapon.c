@@ -1271,7 +1271,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 	int			damage = 6;
 	int			kick = 12;
 
-	ent->client->ps.gunflashframes = 2;
+	ent->client->ps.gunflashframes = 1;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
