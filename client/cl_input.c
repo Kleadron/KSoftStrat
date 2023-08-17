@@ -280,24 +280,53 @@ void CL_BaseMove (usercmd_t *cmd)
 	memset (cmd, 0, sizeof(*cmd));
 	
 	VectorCopy (cl.viewangles, cmd->angles);
+
+	vec3_t moveVec;
+	VectorClear(moveVec);
+
 	if (in_strafe.state & 1)
 	{
-		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
-		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
+		/*cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
+		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);*/
+
+		// y
+		moveVec[1] += CL_KeyState(&in_right);
+		moveVec[1] -= CL_KeyState(&in_left);
 	}
 
-	cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
-	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
+	/*cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
+	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);*/
+
+	// y
+	moveVec[1] += CL_KeyState(&in_moveright);
+	moveVec[1] -= CL_KeyState(&in_moveleft);
 
 	cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
 	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
 
 	if (! (in_klook.state & 1) )
 	{	
-		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
-		cmd->forwardmove -= cl_forwardspeed->value * CL_KeyState (&in_back);
+		/*cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
+		cmd->forwardmove -= cl_forwardspeed->value * CL_KeyState (&in_back);*/
+
+		// x
+		moveVec[0] += CL_KeyState(&in_forward);
+		moveVec[0] -= CL_KeyState(&in_back);
 	}	
 
+	float len = VectorLength(moveVec);
+	if (len > 0)
+	{
+		VectorNormalize(moveVec);
+		if (len > 1)
+		{
+			len = 1;
+		}
+		VectorScale(moveVec, len, moveVec);
+
+		cmd->forwardmove += cl_forwardspeed->value * moveVec[0];
+		cmd->sidemove += cl_sidespeed->value * moveVec[1];
+	}
 //
 // adjust for speed key / running
 //
