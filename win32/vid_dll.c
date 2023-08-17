@@ -355,6 +355,9 @@ LONG WINAPI MainWndProc (
 			int width = LOWORD(lParam);
 			int height = HIWORD(lParam);
 
+			if (width == 0 || height == 0)
+				return;
+
 			viddef.width = width;
 			viddef.height = height;
 			cl.force_refdef = true;		// can't use a paused refdef
