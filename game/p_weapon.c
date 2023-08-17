@@ -449,6 +449,10 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		return;
 	}
 
+	// allow lerping when not firing
+	if (ent->client->ps.gunflashframes > 0)
+		ent->client->ps.gunflashframes--;
+
 	if (ent->client->weaponstate == WEAPON_READY)
 	{
 		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
@@ -459,6 +463,8 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 			{
 				ent->client->ps.gunframe = FRAME_FIRE_FIRST;
 				ent->client->weaponstate = WEAPON_FIRING;
+				// disable lerp on the first frame by default (may be undesirable for certain weapons but you can override this easily)
+				ent->client->ps.gunflashframes = 1;
 
 				// start the animation
 				ent->client->anim_priority = ANIM_ATTACK;
@@ -552,6 +558,9 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	float	timer;
 	int		speed;
 	float	radius;
+
+	// no flash frames
+	ent->client->ps.gunflashframes = 0;
 
 	radius = damage+40;
 	if (is_quad)
@@ -713,6 +722,9 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	vec3_t	start;
 	int		damage = 120;
 	float	radius;
+
+	// no flash frames
+	ent->client->ps.gunflashframes = 0;
 
 	radius = damage+40;
 	if (is_quad)
@@ -971,9 +983,13 @@ void Machinegun_Fire (edict_t *ent)
 	}
 
 	if (ent->client->ps.gunframe == 5)
+	{
 		ent->client->ps.gunframe = 4;
+	}
 	else
+	{
 		ent->client->ps.gunframe = 5;
+	}
 
 	if (ent->client->pers.inventory[ent->client->ammo_index] < 1)
 	{
@@ -986,6 +1002,9 @@ void Machinegun_Fire (edict_t *ent)
 		NoAmmoWeaponChange (ent);
 		return;
 	}
+
+	// actually able to fire, also disable lerping here
+	ent->client->ps.gunflashframes = 1;
 
 	if (is_quad)
 	{
@@ -1251,6 +1270,8 @@ void weapon_supershotgun_fire (edict_t *ent)
 	vec3_t		v;
 	int			damage = 6;
 	int			kick = 12;
+
+	ent->client->ps.gunflashframes = 2;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 

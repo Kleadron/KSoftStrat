@@ -613,6 +613,9 @@ typedef struct
 #define	RF_SHELL_GREEN		2048
 #define RF_SHELL_BLUE		4096
 
+// KSoft
+#define RF_MUZZLEFLASH		8192
+
 //ROGUE
 #define RF_IR_VISIBLE		0x00008000		// 32768
 #define	RF_SHELL_DOUBLE		0x00010000		// 65536
@@ -1195,6 +1198,7 @@ typedef struct
 	vec3_t		gunoffset;
 	int			gunindex;
 	int			gunframe;
+	int			gunflashframes; // how many frames the weapon model should hold interpolation for
 
 	float		blend[4];		// rgba full screen effect
 	

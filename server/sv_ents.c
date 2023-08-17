@@ -381,6 +381,7 @@ void SV_WritePlayerstateToClient (client_frame_t *from, client_frame_t *to, size
 		MSG_WriteChar (msg, ps->gunangles[0]*4);
 		MSG_WriteChar (msg, ps->gunangles[1]*4);
 		MSG_WriteChar (msg, ps->gunangles[2]*4);
+		MSG_WriteByte(msg, ps->gunflashframes);
 	}
 
 	if (pflags & PS_BLEND)

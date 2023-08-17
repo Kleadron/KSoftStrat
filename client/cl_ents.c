@@ -606,6 +606,7 @@ void CL_ParsePlayerstate (frame_t *oldframe, frame_t *newframe)
 		state->gunangles[0] = MSG_ReadChar (&net_message)*0.25;
 		state->gunangles[1] = MSG_ReadChar (&net_message)*0.25;
 		state->gunangles[2] = MSG_ReadChar (&net_message)*0.25;
+		state->gunflashframes = MSG_ReadByte(&net_message);
 	}
 
 	if (flags & PS_BLEND)
@@ -1355,6 +1356,11 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}
 
 	gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
+	if (ps->gunflashframes)
+	{
+		gun.flags |= RF_MUZZLEFLASH;
+	}
+
 	gun.backlerp = 1.0 - cl.lerpfrac;
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 	V_AddEntity (&gun);

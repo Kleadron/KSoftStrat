@@ -1057,7 +1057,7 @@ void R_AliasDrawModel (void)
 
 	s_pmdl = (dmdl_t *)currentmodel->extradata;
 
-	if ( r_lerpmodels->value == 0 )
+	if ( r_lerpmodels->value == 0 || currententity->flags & RF_MUZZLEFLASH )
 		currententity->backlerp = 0;
 
 	if ( currententity->flags & RF_WEAPONMODEL )
