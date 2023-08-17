@@ -1439,13 +1439,13 @@ void CL_InitLocal (void)
 	cl_maxfps = Cvar_Get ("cl_maxfps", "90", 0);
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
-	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "160", 0);
-	cl_sidespeed = Cvar_Get ("cl_sidespeed", "160", 0);
+	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "80", 0);
+	cl_sidespeed = Cvar_Get ("cl_sidespeed", "80", 0);
 	cl_yawspeed = Cvar_Get ("cl_yawspeed", "140", 0);
 	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", 0);
 	cl_anglespeedkey = Cvar_Get ("cl_anglespeedkey", "1.5", 0);
 
-	cl_run = Cvar_Get ("cl_run", "0", CVAR_ARCHIVE);
+	cl_run = Cvar_Get ("cl_run", "1", CVAR_ARCHIVE);
 	freelook = Cvar_Get( "freelook", "0", CVAR_ARCHIVE );
 	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE);
 	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE);
