@@ -20,11 +20,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../client/client.h"
 #include "../client/qmenu.h"
 
-#define REF_SOFT	0
-#define REF_OPENGL	1
-#define REF_3DFX	2
-#define REF_POWERVR	3
-#define REF_VERITE	4
+#define REF_SOFT		0
+#define REF_KOLORSOFT	1
+#define REF_OPENGL		2
+#define REF_3DFX		3
+#define REF_POWERVR		4
+#define REF_VERITE		5
+
 
 extern cvar_t *vid_ref;
 extern cvar_t *vid_gamma;
@@ -86,7 +88,7 @@ static void RefreshCallback( void *unused )
 {
 	s_ref_list[!s_current_menu_index].curvalue = s_ref_list[s_current_menu_index].curvalue;
 
-	if ( s_ref_list[s_current_menu_index].curvalue == 0 )
+	if ( s_ref_list[s_current_menu_index].curvalue <= REF_KOLORSOFT )
 	{
 		s_current_menu = &s_software_menu;
 		s_current_menu_index = 0;
@@ -284,6 +286,9 @@ static void ApplyChanges( void *unused )
 	case REF_SOFT:
 		Cvar_Set( "vid_ref", "soft" );
 		break;
+	case REF_KOLORSOFT:
+		Cvar_Set("vid_ref", "kolorsoft");
+		break;
 	case REF_OPENGL:
 		Cvar_Set( "vid_ref", "gl" );
 		Cvar_Set( "gl_driver", "opengl32" );
@@ -462,11 +467,12 @@ void VID_MenuInit( void )
 	};
 	static const char *refs[] =
 	{
-		"[software]",
-		"[OpenGL  ]",
-		//"[3Dfx OpenGL   ]",
-		//"[PowerVR OpenGL]",
-//		"[Rendition OpenGL]",
+		"[software        ]",
+		"[KolorSoft       ]",
+		"[OpenGL          ]",
+		"[3Dfx OpenGL     ]",
+		"[PowerVR OpenGL  ]",
+		"[Rendition OpenGL]",
 		0
 	};
 	static const char *resolutions[] = 
@@ -529,6 +535,11 @@ void VID_MenuInit( void )
 	{
 		s_current_menu_index = SOFTWARE_MENU;
 		s_ref_list[0].curvalue = s_ref_list[1].curvalue = REF_SOFT;
+	}
+	else if (strcmp(Cvar_VariableString("vid_ref"), "kolorsoft") == 0)
+	{
+		s_current_menu_index = SOFTWARE_MENU;
+		s_ref_list[0].curvalue = s_ref_list[1].curvalue = REF_KOLORSOFT;
 	}
 	else if ( strcmp( Cvar_VariableString("vid_ref"), "gl" ) == 0 )
 	{

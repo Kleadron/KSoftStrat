@@ -46,7 +46,7 @@ qboolean DDRAW_Init( unsigned char **ppbuffer, int *ppitch )
 	DDSCAPS ddscaps;
 	PALETTEENTRY palentries[256];
 	int i;
-	extern cvar_t *sw_allow_modex;
+	//extern cvar_t *sw_allow_modex;
 
 	HRESULT (WINAPI *QDirectDrawCreate)( GUID FAR *lpGUID, LPDIRECTDRAW FAR * lplpDDRAW, IUnknown FAR * pUnkOuter );
 
@@ -118,41 +118,41 @@ ri.Con_Printf( PRINT_ALL, "Initializing DirectDraw\n");
 	/*
 	** if no linear mode found, go for modex if we're trying 320x240
 	*/
-	else if ( ( sw_mode->value == 0 ) && sw_allow_modex->value )
-	{
-		ri.Con_Printf( PRINT_ALL, "failed\n" );
-		ri.Con_Printf( PRINT_ALL, "...attempting ModeX 320x240: ");
+	//else if ( ( sw_mode->value == 0 ) && sw_allow_modex->value )
+	//{
+	//	ri.Con_Printf( PRINT_ALL, "failed\n" );
+	//	ri.Con_Printf( PRINT_ALL, "...attempting ModeX 320x240: ");
 
-		/*
-		** reset to normal cooperative level
-		*/
-		sww_state.lpDirectDraw->lpVtbl->SetCooperativeLevel( sww_state.lpDirectDraw, 
-															 sww_state.hWnd,
-															 DDSCL_NORMAL );
+	//	/*
+	//	** reset to normal cooperative level
+	//	*/
+	//	sww_state.lpDirectDraw->lpVtbl->SetCooperativeLevel( sww_state.lpDirectDraw, 
+	//														 sww_state.hWnd,
+	//														 DDSCL_NORMAL );
 
-		/*															 
-		** set exclusive mode
-		*/
-		if ( ( ddrval = sww_state.lpDirectDraw->lpVtbl->SetCooperativeLevel( sww_state.lpDirectDraw, 
-																			 sww_state.hWnd,
-																			 DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_NOWINDOWCHANGES | DDSCL_ALLOWMODEX ) ) != DD_OK )
-		{
-			ri.Con_Printf( PRINT_ALL, "failed SCL - %s\n",DDrawError (ddrval) );
-			goto fail;
-		}
+	//	/*															 
+	//	** set exclusive mode
+	//	*/
+	//	if ( ( ddrval = sww_state.lpDirectDraw->lpVtbl->SetCooperativeLevel( sww_state.lpDirectDraw, 
+	//																		 sww_state.hWnd,
+	//																		 DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_NOWINDOWCHANGES | DDSCL_ALLOWMODEX ) ) != DD_OK )
+	//	{
+	//		ri.Con_Printf( PRINT_ALL, "failed SCL - %s\n",DDrawError (ddrval) );
+	//		goto fail;
+	//	}
 
-		/*
-		** change our display mode
-		*/
-		if ( ( ddrval = sww_state.lpDirectDraw->lpVtbl->SetDisplayMode( sww_state.lpDirectDraw, vid.width, vid.height, 8 ) ) != DD_OK )
-		{
-			ri.Con_Printf( PRINT_ALL, "failed SDM - %s\n", DDrawError( ddrval ) );
-			goto fail;
-		}
-		ri.Con_Printf( PRINT_ALL, "ok\n" );
+	//	/*
+	//	** change our display mode
+	//	*/
+	//	if ( ( ddrval = sww_state.lpDirectDraw->lpVtbl->SetDisplayMode( sww_state.lpDirectDraw, vid.width, vid.height, 8 ) ) != DD_OK )
+	//	{
+	//		ri.Con_Printf( PRINT_ALL, "failed SDM - %s\n", DDrawError( ddrval ) );
+	//		goto fail;
+	//	}
+	//	ri.Con_Printf( PRINT_ALL, "ok\n" );
 
-		sww_state.modex = true;
-	}
+	//	sww_state.modex = true;
+	//}
 	else
 	{
 		ri.Con_Printf( PRINT_ALL, "failed\n" );

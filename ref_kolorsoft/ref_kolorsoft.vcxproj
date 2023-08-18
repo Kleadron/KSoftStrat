@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EE2BADEE-DB4E-417F-9481-B4039D55961B}</ProjectGuid>
+    <ProjectGuid>{4F320663-5DE2-430A-BD5D-C6395251F4D5}</ProjectGuid>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -100,7 +100,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;WIN32;_WINDOWS;C_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>.\debug/ref_soft.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\debug/ref_kolorsoft.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\debug/</AssemblerListingLocation>
       <ObjectFileName>.\debug/</ObjectFileName>
       <ProgramDataBaseFileName>.\debug/</ProgramDataBaseFileName>
@@ -115,18 +115,18 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\..\debug/ref_soft.dll</OutputFile>
+      <OutputFile>.\..\debug/ref_kolorsoft.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\ref_soft.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\..\debug/ref_kolorsoft.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\..\debug/ref_soft.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>.\..\debug/ref_kolorsoft.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>.\debug/ref_soft.map</MapFileName>
+      <MapFileName>.\debug/ref_kolorsoft.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
-      <ImportLibrary>.\..\debug/ref_soft.lib</ImportLibrary>
+      <ImportLibrary>.\..\debug/ref_kolorsoft.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -151,7 +151,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\release/ref_soft.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\release/ref_kolorsoft.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\release/</AssemblerListingLocation>
       <ObjectFileName>.\release/</ObjectFileName>
       <ProgramDataBaseFileName>.\release/</ProgramDataBaseFileName>
@@ -165,14 +165,14 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\..\release/ref_soft.dll</OutputFile>
+      <OutputFile>.\..\release/ref_kolorsoft.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\ref_soft.def</ModuleDefinitionFile>
-      <ProgramDatabaseFile>.\..\release/ref_soft.pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\ref_kolorsoft.def</ModuleDefinitionFile>
+      <ProgramDatabaseFile>.\..\release/ref_kolorsoft.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
-      <ImportLibrary>.\..\release/ref_soft.lib</ImportLibrary>
+      <ImportLibrary>.\..\release/ref_kolorsoft.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
@@ -198,7 +198,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\ReleaseAXP/ref_soft.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\ReleaseAXP/ref_kolorsoft.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\ReleaseAXP/</AssemblerListingLocation>
       <ObjectFileName>.\ReleaseAXP/</ObjectFileName>
       <ProgramDataBaseFileName>.\ReleaseAXP/</ProgramDataBaseFileName>
@@ -212,14 +212,14 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\..\ReleaseAXP/ref_soft.dll</OutputFile>
+      <OutputFile>.\..\ReleaseAXP/ref_kolorsoft.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\ref_soft.def</ModuleDefinitionFile>
-      <ProgramDatabaseFile>.\..\ReleaseAXP/ref_soft.pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\ref_kolorsoft.def</ModuleDefinitionFile>
+      <ProgramDatabaseFile>.\..\ReleaseAXP/ref_kolorsoft.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
-      <ImportLibrary>.\..\ReleaseAXP/ref_soft.lib</ImportLibrary>
+      <ImportLibrary>.\..\ReleaseAXP/ref_kolorsoft.lib</ImportLibrary>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -240,7 +240,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;WIN32;_WINDOWS;C_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>.\DebugAxp/ref_soft.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\DebugAxp/ref_kolorsoft.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\DebugAxp/</AssemblerListingLocation>
       <ObjectFileName>.\DebugAxp/</ObjectFileName>
       <ProgramDataBaseFileName>.\DebugAxp/</ProgramDataBaseFileName>
@@ -254,16 +254,16 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\..\DebugAxp/ref_soft.dll</OutputFile>
+      <OutputFile>.\..\DebugAxp/ref_kolorsoft.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\ref_soft.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\ref_kolorsoft.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\..\DebugAxp/ref_soft.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>.\..\DebugAxp/ref_kolorsoft.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
-      <ImportLibrary>.\..\DebugAxp/ref_soft.lib</ImportLibrary>
+      <ImportLibrary>.\..\DebugAxp/ref_kolorsoft.lib</ImportLibrary>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
