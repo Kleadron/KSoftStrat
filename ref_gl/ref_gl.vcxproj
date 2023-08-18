@@ -277,6 +277,7 @@
     <ClCompile Include="gl_rmain.c" />
     <ClCompile Include="gl_rmisc.c" />
     <ClCompile Include="gl_rsurf.c" />
+    <ClCompile Include="gl_sky.c" />
     <ClCompile Include="gl_warp.c" />
   </ItemGroup>
   <ItemGroup>
@@ -288,11 +289,10 @@
     <ClInclude Include="..\win32\winquake.h" />
     <ClInclude Include="anorms.h" />
     <ClInclude Include="anormtab.h" />
+    <ClInclude Include="glext.h" />
     <ClInclude Include="gl_local.h" />
     <ClInclude Include="gl_model.h" />
     <ClInclude Include="qgl.h" />
-    <ClInclude Include="qmenu.h" />
-    <ClInclude Include="ref_gl.h" />
     <ClInclude Include="warpsin.h" />
   </ItemGroup>
   <ItemGroup>

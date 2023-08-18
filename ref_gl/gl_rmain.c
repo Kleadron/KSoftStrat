@@ -831,15 +831,16 @@ R_Clear
 */
 void R_Clear (void)
 {
-	GLbitfield	clearbits;	// Knightmare added
+	// Using clearbits causes this to not work on my pc, extremely weird and confusing? I have to use gl_ztrick for it to work
+	//GLbitfield	clearbits;	// Knightmare added
 
 	if (gl_ztrick->value)
 	{
 		static int trickframe;
 
 		if (gl_clear->value)
-		//	qglClear (GL_COLOR_BUFFER_BIT);
-			clearbits |=  GL_COLOR_BUFFER_BIT;
+			qglClear (GL_COLOR_BUFFER_BIT);
+			//clearbits |=  GL_COLOR_BUFFER_BIT;
 
 		trickframe++;
 		if (trickframe & 1)
@@ -858,11 +859,11 @@ void R_Clear (void)
 	else
 	{
 		if (gl_clear->value)
-		//	qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			clearbits |=  (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Knightmare changed
+			qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//	clearbits |=  (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Knightmare changed
 		else
-		//	qglClear (GL_DEPTH_BUFFER_BIT);
-			clearbits |=  GL_DEPTH_BUFFER_BIT;	// Knightmare changed
+			qglClear (GL_DEPTH_BUFFER_BIT);
+		//	clearbits |=  GL_DEPTH_BUFFER_BIT;	// Knightmare changed
 		gldepthmin = 0;
 		gldepthmax = 1;
 		qglDepthFunc (GL_LEQUAL);
@@ -874,14 +875,14 @@ void R_Clear (void)
 	if (gl_config.have_stencil)
 	{
 		qglClearStencil(1);
-	//	qglClear(GL_STENCIL_BUFFER_BIT);
-		clearbits |=  GL_STENCIL_BUFFER_BIT;	// Knightmare changed
+		qglClear(GL_STENCIL_BUFFER_BIT);
+	//	clearbits |=  GL_STENCIL_BUFFER_BIT;	// Knightmare changed
 	}
 
 //	qglDepthRange (gldepthmin, gldepthmax);
 
-	if (clearbits)
-		qglClear(clearbits);
+	//if (clearbits)
+	//	qglClear(clearbits);
 	// end Knightmare
 }
 

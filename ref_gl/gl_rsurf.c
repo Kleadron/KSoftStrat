@@ -813,7 +813,7 @@ void R_DrawTextureChains (void)
 	}
 	else
 	{	// Knightmare- draw lightmapped surfs here
-		GL_EnableMultitexture (true);
+		/*GL_EnableMultitexture (true);
 
 		GL_SelectTexture( gl_texture0);
 		GL_TexEnv (GL_REPLACE);
@@ -821,7 +821,58 @@ void R_DrawTextureChains (void)
 		if (gl_lightmap->value)
 			GL_TexEnv (GL_REPLACE);
 		else 
-			GL_TexEnv (GL_MODULATE);
+			GL_TexEnv (GL_MODULATE);*/
+		
+		// ========== Vic overbright code begin
+
+		GL_EnableMultitexture(true);
+
+		GL_SelectTexture(gl_texture0);
+		if (!gl_config.mtexcombine)
+		{
+			GL_TexEnv(GL_REPLACE);
+			GL_SelectTexture(gl_texture1);
+
+			if (gl_lightmap->value)
+				GL_TexEnv(GL_REPLACE);
+			else
+				GL_TexEnv(GL_MODULATE);
+		}
+		else
+		{
+			GL_TexEnv(GL_COMBINE_EXT);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+			GL_SelectTexture(gl_texture1);
+			GL_TexEnv(GL_COMBINE_EXT);
+
+			if (gl_lightmap->value)
+			{
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+			}
+			else
+			{
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+				qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT);
+			}
+
+			if (r_overbrightbits->value)
+			{
+				qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value);
+			}
+		}
+
+		// ========== Vic overbright code end
+
 
 // Knightmare- added for lightmap update batching
 #ifdef BATCH_LM_UPDATES

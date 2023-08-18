@@ -1495,4 +1495,8 @@ void Info_SetValueForKey (char *s, char *key, char *value)
 
 //====================================================================
 
-
+// Kleadron: I don't know why this stupid function was used but not declared anywhere.
+errno_t Q_strncpyz(const char* dest, const char* src, const rsize_t destSize)
+{
+	return strcpy_s(dest, destSize, src);
+}

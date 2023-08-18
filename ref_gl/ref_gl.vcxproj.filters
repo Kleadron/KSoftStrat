@@ -54,6 +54,9 @@
     <ClCompile Include="..\win32\qgl_win.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gl_sky.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anorms.h">
@@ -83,19 +86,16 @@
     <ClInclude Include="qgl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="qmenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\client\ref.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ref_gl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="warpsin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\win32\winquake.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
