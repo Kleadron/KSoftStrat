@@ -118,7 +118,7 @@
       <OutputFile>.\..\debug/ref_kolorsoft.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\..\debug/ref_kolorsoft.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>./ref_kolorsoft.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\..\debug/ref_kolorsoft.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
