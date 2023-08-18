@@ -277,6 +277,34 @@ void Menu_AddItem( menuframework_s *menu, void *item )
 	menu->nslots = Menu_TallySlots( menu );
 }
 
+
+/*
+==========================
+Menu_ItemIsValidCursorPosition
+
+Knightmare added
+Checks if an item can be used
+as a cursor position.
+==========================
+*/
+qboolean Menu_ItemIsValidCursorPosition (void *item)
+{
+	if (!item)	return false;
+	
+	// hidden items are invalid
+	if ( ((menucommon_s *)item)->flags & QMF_HIDDEN )
+		return false;
+
+	switch ( ((menucommon_s *)item)->type )
+	{
+	case MTYPE_SEPARATOR:
+		return false;
+	default:
+		return true;
+	}
+	return true;
+}
+
 /*
 ** Menu_AdjustCursor
 **
@@ -293,9 +321,10 @@ void Menu_AdjustCursor( menuframework_s *m, int dir )
 	*/
 	if ( m->cursor >= 0 && m->cursor < m->nitems )
 	{
-		if ( ( citem = Menu_ItemAtCursor( m ) ) != 0 )
+		if ( (citem = Menu_ItemAtCursor(m)) != 0 )
 		{
-			if ( citem->type != MTYPE_SEPARATOR )
+		//	if ( citem->type != MTYPE_SEPARATOR )
+			if ( Menu_ItemIsValidCursorPosition(citem) )	// Knightmare- use new function
 				return;
 		}
 	}
@@ -308,9 +337,9 @@ void Menu_AdjustCursor( menuframework_s *m, int dir )
 	{
 		while ( 1 )
 		{
-			citem = Menu_ItemAtCursor( m );
-			if ( citem )
-				if ( citem->type != MTYPE_SEPARATOR )
+			if ( (citem = Menu_ItemAtCursor(m)) != 0 )
+			//	if ( citem->type != MTYPE_SEPARATOR )
+				if ( Menu_ItemIsValidCursorPosition(citem) )	// Knightmare- use new function
 					break;
 			m->cursor += dir;
 			if ( m->cursor >= m->nitems )
@@ -321,9 +350,9 @@ void Menu_AdjustCursor( menuframework_s *m, int dir )
 	{
 		while ( 1 )
 		{
-			citem = Menu_ItemAtCursor( m );
-			if ( citem )
-				if ( citem->type != MTYPE_SEPARATOR )
+			if ( (citem = Menu_ItemAtCursor(m)) != 0 )
+			//	if ( citem->type != MTYPE_SEPARATOR )
+				if ( Menu_ItemIsValidCursorPosition(citem) )	// Knightmare- use new function
 					break;
 			m->cursor += dir;
 			if ( m->cursor < 0 )
@@ -352,6 +381,10 @@ void Menu_Draw( menuframework_s *menu )
 	*/
 	for ( i = 0; i < menu->nitems; i++ )
 	{
+		// Knightmare- skip hidden items
+		if ( ((menucommon_s *)menu->items[i])->flags & QMF_HIDDEN )
+			continue;
+
 		switch ( ( ( menucommon_s * ) menu->items[i] )->type )
 		{
 		case MTYPE_FIELD:

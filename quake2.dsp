@@ -44,7 +44,7 @@ CFG=quake2 - Win32 Debug Alpha
 # PROP Target_Dir ""
 CPP=cl.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /G5 /MT /W4 /GX /Zd /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /G5 /MT /W3 /GX /Zd /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 MTL=midl.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -56,7 +56,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib ogg_static.lib vorbisfile_static.lib /nologo /subsystem:windows /machine:I386 /out:".\quake2_324.exe" /libpath:"win32\lib"
 # SUBTRACT LINK32 /incremental:yes /debug /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "quake2 - Win32 Debug"
@@ -86,7 +86,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386
-# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib /nologo /subsystem:windows /incremental:no /map /debug /machine:I386
+# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib ogg_static.lib vorbisfile_static.lib /nologo /subsystem:windows /incremental:no /map /debug /machine:I386 /out:".\quake2_324.exe" /libpath:"win32\lib"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "quake2 - Win32 Debug Alpha"
@@ -253,6 +253,21 @@ DEP_CPP_CL_CI=\
 	".\qcommon\qcommon.h"\
 	".\qcommon\qfiles.h"\
 	
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\client\cl_download.c
+
+!IF  "$(CFG)" == "quake2 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug Alpha"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Release Alpha"
 
 !ENDIF 
 
@@ -433,6 +448,21 @@ DEP_CPP_CL_INV=\
 	".\qcommon\qcommon.h"\
 	".\qcommon\qfiles.h"\
 	
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\client\cl_lights.c
+
+!IF  "$(CFG)" == "quake2 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug Alpha"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Release Alpha"
 
 !ENDIF 
 
@@ -1484,6 +1514,21 @@ DEP_CPP_SND_MI=\
 # End Source File
 # Begin Source File
 
+SOURCE=.\client\snd_stream.c
+
+!IF  "$(CFG)" == "quake2 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug Alpha"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Release Alpha"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\win32\snd_win.c
 
 !IF  "$(CFG)" == "quake2 - Win32 Release"
@@ -1906,6 +1951,21 @@ DEP_CPP_VID_M=\
 # End Source File
 # Begin Source File
 
+SOURCE=.\qcommon\wildcard.c
+
+!IF  "$(CFG)" == "quake2 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Debug Alpha"
+
+!ELSEIF  "$(CFG)" == "quake2 - Win32 Release Alpha"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\client\x86.c
 
 !IF  "$(CFG)" == "quake2 - Win32 Release"
@@ -2023,11 +2083,27 @@ SOURCE=.\client\snd_loc.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\client\snd_ogg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\client\sound.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\client\vid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\qcommon\vid_modes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\qcommon\vid_resolutions.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\qcommon\wildcard.h
 # End Source File
 # Begin Source File
 

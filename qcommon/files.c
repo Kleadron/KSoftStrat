@@ -24,6 +24,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // define this to dissalow any data but the demo pak file
 //#define	NO_ADDONS
 
+// enables faster binary pak searck, still experimental
+#define BINARY_PACK_SEARCH
+
 // if a packfile directory differs from this, it is assumed to be hacked
 // Full version
 #define	PAK0_CHECKSUM	0x40e614e0
@@ -48,7 +51,9 @@ QUAKE FILESYSTEM
 typedef struct
 {
 	char	name[MAX_QPATH];
+	long	hash;		// Knightmare added- To speed up searching
 	int		filepos, filelen;
+	qboolean		ignore;		// Knightmare added- whether this file should be ignored
 } packfile_t;
 
 typedef struct pack_s
@@ -57,11 +62,14 @@ typedef struct pack_s
 	FILE	*handle;
 	int		numfiles;
 	packfile_t	*files;
+	unsigned int	contentFlags;	// Knightmare added- to skip cetain paks
 } pack_t;
 
 char	fs_gamedir[MAX_OSPATH];
 cvar_t	*fs_basedir;
 cvar_t	*fs_cddir;
+cvar_t	*fs_basegamedir;	// Knightmare added
+cvar_t	*fs_basegamedir2;	// Knightmare added
 cvar_t	*fs_gamedirvar;
 
 typedef struct filelink_s
@@ -84,6 +92,7 @@ typedef struct searchpath_s
 searchpath_t	*fs_searchpaths;
 searchpath_t	*fs_base_searchpaths;	// without gamedirs
 
+char *COM_FileExtension (char *in);
 
 /*
 
@@ -96,6 +105,48 @@ The "game directory" is the first tree on the search path and directory that all
 
 */
 
+// Knightmare added
+char *type_extensions[] =
+{
+	"bsp",
+	"md2",
+	"sp2",
+	"dm2",
+	"cin",
+	"wav",
+	"ogg",
+	"pcx",
+	"wal",
+	"tga",
+//	"jpg",
+//	"png",
+	"cfg",
+	"txt",
+	"def",
+	"alias",
+	0
+};
+
+/*
+=================
+FS_TypeFlagForPakItem
+Returns bit flag based on pak item's extension.
+=================
+*/
+unsigned int FS_TypeFlagForPakItem (char *itemName)
+{
+	int		i;	
+	char	*tmp, extension[8];
+
+	tmp = COM_FileExtension (itemName);
+	strncpy(extension, tmp, sizeof(extension));
+	for (i=0; type_extensions[i]; i++) {
+		if ( !Q_stricmp(extension, type_extensions[i]) )
+			return (1<<i);
+	}
+	return 0;
+}
+// end Knightmare
 
 /*
 ================
@@ -126,6 +177,13 @@ Creates any directories needed to store the given filename
 void	FS_CreatePath (char *path)
 {
 	char	*ofs;
+
+	// Knightmare added
+	if (strstr(path, "..") || strstr(path, "::") || strstr(path, "\\\\") || strstr(path, "//"))
+	{
+		Com_Printf("WARNING: refusing to create relative path '%s'\n", path);
+		return;
+	}
 	
 	for (ofs = path+1 ; *ofs ; ofs++)
 	{
@@ -136,6 +194,19 @@ void	FS_CreatePath (char *path)
 			*ofs = '/';
 		}
 	}
+}
+
+// Knightmare- Psychospaz's mod detector
+qboolean FS_ModType (char *name)
+{
+	searchpath_t	*search;
+
+	for (search = fs_searchpaths ; search ; search = search->next)
+	{
+		if (strstr (search->filename, name))
+			return true;
+	}
+	return (0);
 }
 
 
@@ -191,6 +262,47 @@ int	Developer_searchpath (int who)
 
 }
 
+// Knightmare added
+#ifdef BINARY_PACK_SEARCH
+/*
+=================
+FS_FindPackItem
+
+Performs a binary search by hashed filename
+to find pack items in a sorted pack
+=================
+*/
+int FS_FindPackItem (pack_t *pack, char *itemName, long itemHash)
+{
+	int		smax, smin, smidpt;	//, counter = 0;
+	int		i;
+
+	// catch null pointers
+	if ( !pack || !itemName )
+		return -1;
+
+	smin = 0;	smax = pack->numfiles;
+	while ( (smax - smin) > 5 )	//&& counter < pack->numFiles )
+	{
+		smidpt = (smax + smin) / 2;
+		if (pack->files[smidpt].hash > itemHash)	// before midpoint
+			smax = smidpt;
+		else if (pack->files[smidpt].hash < itemHash)	// after midpoint
+			smin = smidpt;
+		else	// pack->files[smidpt].hash == itemHash
+			break;
+	//	counter++;
+	}
+	for (i=smin; i<smax; i++)
+	{	// make sure this entry is not blacklisted & compare filenames
+		if ( pack->files[i].hash == itemHash && !pack->files[i].ignore
+			&& !Q_stricmp(pack->files[i].name, itemName) )
+			return i;
+	}
+	return -1;
+}
+#endif	// BINARY_PACK_SEARCH
+
 
 /*
 ===========
@@ -211,8 +323,14 @@ int FS_FOpenFile (char *filename, FILE **file)
 	pack_t			*pak;
 	int				i;
 	filelink_t		*link;
+	// Knightmare added
+	long			hash;
+	unsigned int	typeFlag;
 
 	file_from_pak = 0;
+	// Knightmare added
+	hash = Com_HashFileName(filename, 0, false);
+	typeFlag = FS_TypeFlagForPakItem(filename);
 
 	// check for links first
 	for (link = fs_links ; link ; link=link->next)
@@ -240,7 +358,26 @@ int FS_FOpenFile (char *filename, FILE **file)
 		{
 		// look through all the pak file elements
 			pak = search->pack;
+
+			// Knightmare- skip if pack doesn't contain this type of file
+			if ((typeFlag != 0)) {
+				if (!(pak->contentFlags & typeFlag))
+					continue;
+			}
+#ifdef BINARY_PACK_SEARCH	// Knightmare- use new binary algorithm
+			// find index of pack item
+			i = FS_FindPackItem (pak, filename, hash);
+			// found it!
+			if ( i != -1 && i >= 0 && i < pak->numfiles )
+			{
+#else
 			for (i=0 ; i<pak->numfiles ; i++)
+			{
+				if (pak->files[i].ignore)	// Knightmare- skip blacklisted files
+					continue;
+				if (hash != pak->files[i].hash)	// Knightmare- compare hash first
+					continue;
+#endif	// 	BINARY_PACK_SEARCH
 				if (!Q_strcasecmp (pak->files[i].name, filename))
 				{	// found it!
 					file_from_pak = 1;
@@ -252,6 +389,7 @@ int FS_FOpenFile (char *filename, FILE **file)
 					fseek (*file, pak->files[i].filepos, SEEK_SET);
 					return pak->files[i].filelen;
 				}
+			}
 		}
 		else
 		{		
@@ -286,8 +424,12 @@ int FS_FOpenFile (char *filename, FILE **file)
 	char			netpath[MAX_OSPATH];
 	pack_t			*pak;
 	int				i;
+	// Knightmare added
+	long			hash;
 
 	file_from_pak = 0;
+	// Knightmare added
+	hash = Com_HashFileName(filename, 0, false);
 
 	// get config from directory, everything else from pak
 	if (!strcmp(filename, "config.cfg") || !strncmp(filename, "players/", 8))
@@ -314,6 +456,11 @@ int FS_FOpenFile (char *filename, FILE **file)
 
 	pak = search->pack;
 	for (i=0 ; i<pak->numfiles ; i++)
+	{
+		if (pak->files[i].ignore)	// Knightmare- skip blacklisted files
+			continue;
+		if (hash != pak->files[i].hash)	// Knightmare- compare hash first
+			continue;
 		if (!Q_strcasecmp (pak->files[i].name, filename))
 		{	// found it!
 			file_from_pak = 1;
@@ -325,6 +472,7 @@ int FS_FOpenFile (char *filename, FILE **file)
 			fseek (*file, pak->files[i].filepos, SEEK_SET);
 			return pak->files[i].filelen;
 		}
+	}
 	
 	Com_DPrintf ("FindFile: can't find %s\n", filename);
 	
@@ -337,7 +485,7 @@ int FS_FOpenFile (char *filename, FILE **file)
 
 /*
 =================
-FS_ReadFile
+FS_Read
 
 Properly handles partial reads
 =================
@@ -383,6 +531,98 @@ void FS_Read (void *buffer, int len, FILE *f)
 		buf += read;
 	}
 }
+
+
+// Knightmare added
+#if 0
+/*
+=================
+FS_FRead
+
+Properly handles partial reads of size up to count times
+No error if it can't read
+=================
+*/
+int FS_FRead (void *buffer, int size, int count, FILE *f)
+{
+	int			loops, remaining, r;
+	byte		*buf;
+	qboolean	tried = false;
+
+	// Read
+	loops = count;
+	//remaining = size;
+	buf = (byte *)buffer;
+
+	while (loops)
+	{	// Read in chunks
+		remaining = size;
+		while (remaining)
+		{
+			r = fread(buf, 1, remaining, f);
+
+			if (r == 0)
+			{
+				if (!tried)
+				{	// We might have been trying to read from a CD
+					CDAudio_Stop();
+					tried = true;
+				}
+				else {
+				//	Com_Printf("FS_FRead: 0 bytes read\n");
+					return size - remaining;
+				}
+			}
+			else if (r == -1)
+				Com_Error(ERR_FATAL, "FS_FRead: -1 bytes read");
+
+			remaining -= r;
+			buf += r;
+		}
+		loops--;
+	}
+	return size;
+}
+
+
+/*
+=================
+FS_Seek
+=================
+*/
+void FS_Seek (FILE *f, int offset, fsOrigin_t origin)
+{
+	switch (origin)
+	{
+	case FS_SEEK_SET:
+		fseek(f, offset, SEEK_SET);
+		break;
+	case FS_SEEK_CUR:
+		fseek(f, offset, SEEK_CUR);
+		break;
+	case FS_SEEK_END:
+		fseek(f, offset, SEEK_END);
+		break;
+	default:
+		Com_Error(ERR_FATAL, "FS_Seek: bad origin (%i)", origin);
+	}
+}
+
+
+/*
+=================
+FS_Tell
+
+Returns -1 if an error occurs
+=================
+*/
+int FS_Tell (FILE *f)
+{
+	return ftell(f);
+}
+#endif
+// end Knightmare
+
 
 /*
 ============
@@ -436,6 +676,65 @@ void FS_FreeFile (void *buffer)
 	Z_Free (buffer);
 }
 
+
+// Some incompetently packaged mods have these files in their paks!
+char *pakfile_ignore_names[] =
+{
+	"save/",
+	"scrnshot/",
+	"autoexec.cfg",
+	"config.cfg",
+	0
+};
+
+/*
+=================
+FS_FileInPakBlacklist
+
+Checks against a blacklist to see if a file
+should not be loaded from a pak.
+=================
+*/
+qboolean FS_FileInPakBlacklist (char *filename)
+{
+	int			i;
+	char		*compare;
+	qboolean	ignore = false;
+
+	compare = filename;
+	if (compare[0] == '/')	// remove leading slash
+		compare++;
+
+	for (i=0; pakfile_ignore_names[i]; i++) {
+		if ( !Q_strncasecmp(compare, pakfile_ignore_names[i], strlen(pakfile_ignore_names[i])) )
+			ignore = true;
+	}
+
+//	if (ignore)
+//		Com_Printf ("FS_LoadPackFile: file %s blacklisted!\n", filename);
+//	else if ( !strncmp (filename, "save/", 5) )
+//		Com_Printf ("FS_LoadPackFile: file %s not blacklisted.\n", filename);
+	return ignore;
+}
+
+#ifdef BINARY_PACK_SEARCH
+/*
+=================
+FS_PakFileCompare
+ 
+Used for sorting pak entries by hash
+=================
+*/
+long *nameHashes = NULL;
+int FS_PakFileCompare (const void *f1, const void *f2)
+{
+	if (!nameHashes)
+		return 1;
+
+	return (nameHashes[*((int *)(f1))] - nameHashes[*((int *)(f2))]);
+}
+#endif	// BINARY_PACK_SEARCH
+
 /*
 =================
 FS_LoadPackFile
@@ -444,8 +743,13 @@ Takes an explicit (not game tree related) path to a pak file.
 
 Loads the header and directory, adding the files at the beginning
 of the list so they override previous pack files.
+
+Knightmare- added checks for corrupt/malicious paks by Skuller
 =================
 */
+#ifndef LONG_MAX
+#define LONG_MAX	0x7FFFFFFF
+#endif
 pack_t *FS_LoadPackFile (char *packfile)
 {
 	dpackheader_t	header;
@@ -456,26 +760,66 @@ pack_t *FS_LoadPackFile (char *packfile)
 	FILE			*packhandle;
 	dpackfile_t		info[MAX_FILES_IN_PACK];
 	unsigned		checksum;
+	unsigned		contentFlags = 0;	// Knightmare added
+	int				tmpPos, tmpLen;		// Knightmare added
+#ifdef BINARY_PACK_SEARCH	//  Knightmare added
+	int				*sortIndices;
+	long			*sortHashes;
+#endif	// BINARY_PACK_SEARCH
 
 	packhandle = fopen(packfile, "rb");
 	if (!packhandle)
 		return NULL;
 
-	fread (&header, 1, sizeof(header), packhandle);
-	if (LittleLong(header.ident) != IDPAKHEADER)
-		Com_Error (ERR_FATAL, "%s is not a packfile", packfile);
+	if ( fread (&header, 1, sizeof(header), packhandle) != sizeof(header) ) {	// Knightmare- catch bad header
+		Com_Printf ("Failed to read header on %s\n", packfile);
+		fclose(packhandle);
+		return NULL;
+	}
+	if (LittleLong(header.ident) != IDPAKHEADER) {	// Knightmare- made this not fatal
+	//	Com_Error (ERR_F/*ATAL, "%s is not a packfile", packfile);
+		Com_Printf ("%s is not a pak file\n", packfile);
+		fclose(packhandle);
+		return NULL;
+	}
 	header.dirofs = LittleLong (header.dirofs);
 	header.dirlen = LittleLong (header.dirlen);
+	if ( header.dirlen > LONG_MAX )	// || (header.dirlen % sizeof(packfile_t)) != 0 )	// Knightmare- catch bad dirlen
+	{
+		Com_Printf ("%s has a bad directory length\n", packfile);
+		fclose(packhandle);
+		return NULL;
+	}
+	if ( header.dirofs > (LONG_MAX - header.dirlen) )	// Knightmare- catch bad dirofs
+	{
+		Com_Printf ("%s has a bad directory offset\n", packfile);
+		fclose(packhandle);
+		return NULL;
+	}
 
 	numpackfiles = header.dirlen / sizeof(dpackfile_t);
 
-	if (numpackfiles > MAX_FILES_IN_PACK)
-		Com_Error (ERR_FATAL, "%s has %i files", packfile, numpackfiles);
+	if (numpackfiles > MAX_FILES_IN_PACK) {	// Knightmare- made this not fatal
+	//	Com_Error (ERR_FATAL, "%s has %i files", packfile, numpackfiles);
+		Com_Printf ("%s has too many files: %i > %i\n", packfile, numpackfiles, MAX_FILES_IN_PACK);
+		fclose(packhandle);
+		return NULL;
+	}
 
-	newfiles = Z_Malloc (numpackfiles * sizeof(packfile_t));
+//	newfiles = Z_Malloc (numpackfiles * sizeof(packfile_t));
 
-	fseek (packhandle, header.dirofs, SEEK_SET);
-	fread (info, 1, header.dirlen, packhandle);
+	if ( fseek (packhandle, header.dirofs, SEEK_SET) )	// Knightmare- catch seek failure
+	{
+		Com_Printf ("Seeking to directory failed on %s\n", packfile);
+		fclose(packhandle);
+		return NULL;
+	}
+	if ( fread (info, 1, header.dirlen, packhandle) != header.dirlen )	// Knightmare- catch dir read failure
+	{
+		Com_Printf ("Reading directory failed on %s\n", packfile);
+		fclose(packhandle);
+		return NULL;
+	}
 
 // crc the directory to check for modifications
 	checksum = Com_BlockChecksum ((void *)info, header.dirlen);
@@ -484,19 +828,69 @@ pack_t *FS_LoadPackFile (char *packfile)
 	if (checksum != PAK0_CHECKSUM)
 		return NULL;
 #endif
+
+	for (i = 0; i < numpackfiles; i++)	// Knightmare- catch bad filelen / filepos
+	{
+		tmpPos = LittleLong(info[i].filepos);
+		tmpLen = LittleLong(info[i].filelen);
+		if ( tmpLen > LONG_MAX || tmpPos > (LONG_MAX - tmpLen) )
+		{
+			Com_Printf ("%s has a bad directory structure\n", packfile);
+			fclose(packhandle);
+			return NULL;
+		}
+	}
+
+	newfiles = Z_Malloc (numpackfiles * sizeof(packfile_t));	// Knightmare- moved newfiles alloc here
+
+#ifdef BINARY_PACK_SEARCH	// Knightmare- sorting of pak contents for binary search
+	// create sort table
+	sortIndices = Z_Malloc(numpackfiles * sizeof(int));
+	sortHashes = Z_Malloc(numpackfiles * sizeof(unsigned));
+	nameHashes = sortHashes;
+	for (i = 0; i < numpackfiles; i++)
+	{
+		sortIndices[i] = i;
+		sortHashes[i] = Com_HashFileName(info[i].name, 0, false);
+	}
+	qsort((void *)sortIndices, numpackfiles, sizeof(int), FS_PakFileCompare);
+
+	// Parse the directory
+	for (i = 0; i < numpackfiles; i++)
+	{
+		strcpy(newfiles[i].name, info[sortIndices[i]].name);
+		newfiles[i].hash = sortHashes[sortIndices[i]];
+		newfiles[i].filepos = LittleLong(info[sortIndices[i]].filepos);
+		newfiles[i].filelen = LittleLong(info[sortIndices[i]].filelen);
+		newfiles[i].ignore = FS_FileInPakBlacklist(newfiles[i].name);	// check against pak loading blacklist
+		if (!newfiles[i].ignore)	// add type flag for this file
+			contentFlags |= FS_TypeFlagForPakItem(newfiles[i].name);
+	}
+
+	// free sort table
+	Z_Free (sortIndices);
+	Z_Free (sortHashes);
+	nameHashes = NULL;
+#else
 // parse the directory
 	for (i=0 ; i<numpackfiles ; i++)
 	{
 		strcpy (newfiles[i].name, info[i].name);
+		newfiles[i].hash = Com_HashFileName(info[i].name, 0, false);	// Knightmare- added to speed up seaching
 		newfiles[i].filepos = LittleLong(info[i].filepos);
 		newfiles[i].filelen = LittleLong(info[i].filelen);
+		newfiles[i].ignore = FS_FileInPakBlacklist(info[i].name);	// Knightmare- check against pak loading blacklist
+		if (!newfiles[i].ignore)	// Knightmare- add type flag for this file
+			contentFlags |= FS_TypeFlagForPakItem(newfiles[i].name);
 	}
+#endif	// BINARY_PACK_SEARCH
 
 	pack = Z_Malloc (sizeof (pack_t));
 	strcpy (pack->filename, packfile);
 	pack->handle = packhandle;
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
+	pack->contentFlags = contentFlags;	// Knightmare added
 	
 	Com_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
 	return pack;
@@ -531,7 +925,7 @@ void FS_AddGameDirectory (char *dir)
 	//
 	// add any pak files in the format pak0.pak pak1.pak, ...
 	//
-	for (i=0; i<10; i++)
+	for (i=0; i<100; i++) // Knightmare- go up to pak99
 	{
 		Com_sprintf (pakfile, sizeof(pakfile), "%s/pak%i.pak", dir, i);
 		pak = FS_LoadPackFile (pakfile);
@@ -555,7 +949,10 @@ Called to find where to write a file (demos, savegames, etc)
 */
 char *FS_Gamedir (void)
 {
-	return fs_gamedir;
+	if (*fs_gamedir)
+		return fs_gamedir;
+	else
+		return BASEDIRNAME;
 }
 
 /*
@@ -589,6 +986,7 @@ Sets the gamedir and path to a different directory.
 void FS_SetGamedir (char *dir)
 {
 	searchpath_t	*next;
+	qboolean		basegame1_loaded = false;	// Knightmare added
 
 	if (strstr(dir, "..") || strstr(dir, "/")
 		|| strstr(dir, "\\") || strstr(dir, ":") )
@@ -597,6 +995,38 @@ void FS_SetGamedir (char *dir)
 		return;
 	}
 
+	// Knightmare- check basegame var
+	if ( fs_basegamedir->string[0] )
+	{
+		if (strstr(fs_basegamedir->string, "..") || strstr(fs_basegamedir->string, "/")
+			|| strstr(fs_basegamedir->string, "\\") || strstr(fs_basegamedir->string, ":"))
+		{
+			Cvar_Set ("basegame", "");
+			Com_Printf ("Basegame should be a single filename, not a path\n");
+		}
+		if ( !Q_stricmp(fs_basegamedir->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir->string, dir) )
+		{
+			Cvar_Set ("basegame", "");
+			Com_Printf ("Basegame should not be the same as "BASEDIRNAME" or gamedir.\n");
+		}
+	}
+
+	// Knightmare- check basegame2 var
+	if ( fs_basegamedir2->string[0] )
+	{
+		if (strstr(fs_basegamedir2->string, "..") || strstr(fs_basegamedir2->string, "/")
+			|| strstr(fs_basegamedir2->string, "\\") || strstr(fs_basegamedir2->string, ":") )
+		{
+			Cvar_Set ("basegame2", "");
+			Com_Printf ("Basegame2 should be a single filename, not a path\n");
+		}
+		if ( !Q_stricmp(fs_basegamedir2->string, BASEDIRNAME) || !Q_stricmp(fs_basegamedir2->string, dir)
+			|| !Q_stricmp(fs_basegamedir2->string, fs_basegamedir->string) )
+		{
+			Cvar_Set ("basegame2", "");
+			Com_Printf ("Basegame2 should not be the same as "BASEDIRNAME", gamedir, or basegame.\n");
+		}
+	}
 	//
 	// free up any current game dir info
 	//
@@ -619,7 +1049,10 @@ void FS_SetGamedir (char *dir)
 	if (dedicated && !dedicated->value)
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
 
-	Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/%s", fs_basedir->string, dir);
+	if (*dir == 0)	// Knightmare- set to basedir if a blank dir is passed
+		Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/"BASEDIRNAME, fs_basedir->string);
+	else
+		Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/%s", fs_basedir->string, dir);
 
 	if (!strcmp(dir,BASEDIRNAME) || (*dir == 0))
 	{
@@ -628,6 +1061,25 @@ void FS_SetGamedir (char *dir)
 	}
 	else
 	{
+		// Knightmare- check and load base game directory (so mods can be based upon other mods)
+		if ( fs_basegamedir->string[0] )
+		{
+		//	Com_Printf("Adding basegame path %s/%s\n", fs_basedir->string, fs_basegamedir->string);
+			if (fs_cddir->string[0])
+				FS_AddGameDirectory (va("%s/%s", fs_cddir->string, fs_basegamedir->string) );
+			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir->string) );
+			basegame1_loaded = true;
+		}
+
+		// Knightmare- second basegame so mods can utilize both Rogue and Xatrix assets
+		if ( basegame1_loaded && fs_basegamedir2->string[0] )
+		{
+		//	Com_Printf("Adding basegame2 path %s/%s\n", fs_basedir->string, fs_basegamedir2->string);
+			if (fs_cddir->string[0])
+				FS_AddGameDirectory (va("%s/%s", fs_cddir->string, fs_basegamedir2->string) );
+			FS_AddGameDirectory (va("%s/%s", fs_basedir->string, fs_basegamedir2->string) );
+		}
+
 		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
 		if (fs_cddir->string[0])
 			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
@@ -646,11 +1098,23 @@ Creates a filelink_t
 void FS_Link_f (void)
 {
 	filelink_t	*l, **prev;
+	char		*to;
 
 	if (Cmd_Argc() != 3)
 	{
 		Com_Printf ("USAGE: link <from> <to>\n");
 		return;
+	}
+
+	// r1ch's fix to prevent filesystem browsing
+	to = Cmd_Argv(2);
+	if (to[0])
+	{
+		if (strstr(to, "..") || strchr(to, '\\') || *to != '.')
+		{
+			Com_Printf ("Illegal destination path.\n");
+			return;
+		}
 	}
 
 	// see if the link already exists
@@ -700,8 +1164,10 @@ char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned 
 	}
 	Sys_FindClose ();
 
-	if ( !nfiles )
+	if ( !nfiles ) {
+		*numfiles = 0;
 		return NULL;
+	}
 
 	nfiles++; // add space for a guard
 	*numfiles = nfiles;
@@ -795,6 +1261,7 @@ void FS_Path_f (void)
 		if (s == fs_base_searchpaths)
 			Com_Printf ("----------\n");
 		if (s->pack)
+		//	Com_Printf("%s (%i files, content flags: %d)\n", s->pack->filename, s->pack->numfiles, s->pack->contentFlags);
 			Com_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
 		else
 			Com_Printf ("%s\n", s->filename);
@@ -872,10 +1339,137 @@ void FS_InitFilesystem (void)
 	fs_base_searchpaths = fs_searchpaths;
 
 	// check for game override
+	fs_basegamedir = Cvar_Get ("basegame", "", CVAR_LATCH);	// Knightmare added
+	fs_basegamedir2 = Cvar_Get ("basegame2", "", CVAR_LATCH);	// Knightmare added
 	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
+
+	// check and load game directory
 	if (fs_gamedirvar->string[0])
 		FS_SetGamedir (fs_gamedirvar->string);
 }
 
+// Knightmare added
+/*
+=================
+FS_ListPak
+
+Generates a listing of the contents of a pak file
+=================
+*/
+char **FS_ListPak (char *find, int *num)
+{
+	searchpath_t	*search;
+	//char			netpath[MAX_OSPATH];
+	pack_t			*pak;
+
+	int nfiles = 0, nfound = 0;
+	char **list = 0;
+	int i;
+
+	// now check pak files
+	for (search = fs_searchpaths; search; search = search->next)
+	{
+		if (!search->pack)
+			continue;
+
+		pak = search->pack;
+
+		// now find and build list
+		for (i=0 ; i<pak->numfiles ; i++)
+				nfiles++;
+	}
+
+	list = malloc( sizeof( char * ) * nfiles );
+	memset( list, 0, sizeof( char * ) * nfiles );
+
+	for (search = fs_searchpaths; search; search = search->next)
+	{
+		if (!search->pack)
+			continue;
+
+		pak = search->pack;
+
+		// now find and build list
+		for (i=0 ; i<pak->numfiles ; i++)
+		{
+			if (strstr(pak->files[i].name, find))
+			{
+				list[nfound] = strdup(pak->files[i].name);
+				nfound++;
+			}
+		}
+	}
+	
+	*num = nfound;
+
+	return list;		
+}
 
 
+/*
+=================
+FS_FreeFileList
+=================
+*/
+void FS_FreeFileList (char **list, int n)
+{
+	int i;
+
+	for (i = 0; i < n; i++)
+	{
+		if (list && list[i])
+		{
+			free(list[i]);
+			list[i] = 0;
+		}
+	}
+	free(list);
+}
+
+
+/*
+=================
+FS_ItemInList
+=================
+*/
+qboolean FS_ItemInList (char *check, int num, char **list)
+{
+	int		i;
+
+	if (!check || !list)
+		return false;
+	for (i=0; i<num; i++)
+	{
+		if (!list[i])
+			continue;
+		if (!Q_strcasecmp(check, list[i]))
+			return true;
+	}
+	return false;
+}
+
+
+/*
+=================
+FS_InsertInList
+=================
+*/
+void FS_InsertInList (char **list, char *insert, int len, int start)
+{
+	int		i;
+
+	if (!list) return;
+	if (len < 1 || start < 0) return;
+	if (start >= len) return;
+
+	for (i=start; i<len; i++)
+	{
+		if (!list[i])
+		{
+			list[i] = strdup(insert);
+			return;
+		}
+	}
+	list[len] = strdup(insert);
+}
+// end Knightmare
