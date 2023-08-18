@@ -26,7 +26,7 @@ echo --------------RUN---------------
 rem pushd ksoft\maps
 rem copy %map%.bsp %quake2repo%\ksoft\maps
 rem pushd %quake2repo%
-call debug\Quake2.exe +map %1 +set game ksoft
+call debug\Quake2.exe +map %1 +set game ksoft +set developer 1
 
 rem popd
 rem popd
