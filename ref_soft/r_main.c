@@ -136,6 +136,12 @@ cvar_t	*r_lightlevel;	//FIXME HACK
 cvar_t	*vid_fullscreen;
 cvar_t	*vid_gamma;
 
+// FS
+cvar_t	*sw_particle_size;			
+cvar_t	*sw_particle_size_min;
+cvar_t	*sw_particle_size_max;
+cvar_t	*sw_particle_size_override;
+
 //PGM
 cvar_t	*sw_lockpvs;
 //PGM
@@ -232,7 +238,7 @@ void R_InitTurb (void)
 {
 	int		i;
 	
-	for (i=0 ; i<1280 ; i++)
+	for (i=0 ; i<SINTABLESIZE ; i++)
 	{
 		sintable[i] = AMP + sin(i*3.14159*2/CYCLE)*AMP;
 		intsintable[i] = AMP2 + sin(i*3.14159*2/CYCLE)*AMP2;	// AMP2, not 20
@@ -258,7 +264,7 @@ void R_Register (void)
 	sw_stipplealpha = ri.Cvar_Get( "sw_stipplealpha", "0", CVAR_ARCHIVE );
 	sw_surfcacheoverride = ri.Cvar_Get ("sw_surfcacheoverride", "0", 0);
 	sw_waterwarp = ri.Cvar_Get ("sw_waterwarp", "1", 0);
-	sw_mode = ri.Cvar_Get( "sw_mode", "0", CVAR_ARCHIVE );
+	sw_mode = ri.Cvar_Get( "sw_mode", "3", CVAR_ARCHIVE );	// Knightmare- changed default to 3, 640x480
 
 	r_lefthand = ri.Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 	r_speeds = ri.Cvar_Get ("r_speeds", "0", 0);
@@ -272,6 +278,12 @@ void R_Register (void)
 
 	vid_fullscreen = ri.Cvar_Get( "vid_fullscreen", "0", CVAR_ARCHIVE );
 	vid_gamma = ri.Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
+ 
+	// FS
+	sw_particle_size = ri.Cvar_Get ("sw_particle_size", "8", CVAR_ARCHIVE);
+	sw_particle_size_min = ri.Cvar_Get ("sw_particle_size_min", "1", CVAR_ARCHIVE);
+	sw_particle_size_max = ri.Cvar_Get ("sw_particle_size_max", "8.5", CVAR_ARCHIVE);
+	sw_particle_size_override = ri.Cvar_Get ("sw_particle_size_override", "0", CVAR_ARCHIVE);
 
 	ri.Cmd_AddCommand ("modellist", Mod_Modellist_f);
 	ri.Cmd_AddCommand( "screenshot", R_ScreenShot_f );
@@ -1111,6 +1123,14 @@ void R_BeginFrame( float camera_separation )
 	{
 		rserr_t err;
 
+		// Knightmare- 1366x768 mode not supported by software renderer
+		if (sw_mode->value == 21)
+		{
+			ri.Con_Printf( PRINT_ALL, "ref_soft::R_BeginFrame() - 1366x768 mode not supported.\nFalling back to 1360x768.\n" );
+			ri.Cvar_SetValue ("sw_mode", 20);
+		}
+		// end Knightmare
+
 		/*
 		** if this returns rserr_invalid_fullscreen then it set the mode but not as a
 		** fullscreen mode, e.g. 320x200 on a system that doesn't support that res
@@ -1401,7 +1421,8 @@ void Sys_Error (char *error, ...)
 	char		text[1024];
 
 	va_start (argptr, error);
-	vsprintf (text, error, argptr);
+//	vsprintf (text, error, argptr);
+	Q_vsnprintf (text, sizeof(text), error, argptr);
 	va_end (argptr);
 
 	ri.Sys_Error (ERR_FATAL, "%s", text);
@@ -1413,7 +1434,8 @@ void Com_Printf (char *fmt, ...)
 	char		text[1024];
 
 	va_start (argptr, fmt);
-	vsprintf (text, fmt, argptr);
+//	vsprintf (text, fmt, argptr);
+	Q_vsnprintf (text, sizeof(text), fmt, argptr);
 	va_end (argptr);
 
 	ri.Con_Printf (PRINT_ALL, "%s", text);

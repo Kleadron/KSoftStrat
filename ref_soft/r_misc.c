@@ -86,14 +86,16 @@ void D_ViewChanged (void)
 	d_zrowbytes = vid.width * 2;
 	d_zwidth = vid.width;
 
-	d_pix_min = r_refdef.vrect.width / 320;
+/*	d_pix_min = r_refdef.vrect.width / 320;
 	if (d_pix_min < 1)
 		d_pix_min = 1;
 
 	d_pix_max = (int)((float)r_refdef.vrect.width / (320.0 / 4.0) + 0.5);
-	d_pix_shift = 8 - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
 	if (d_pix_max < 1)
 		d_pix_max = 1;
+	d_pix_shift = 8 - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
+*/
+	D_SetParticleSize ();	// FS
 
 	d_vrectx = r_refdef.vrect.x;
 	d_vrecty = r_refdef.vrect.y;
@@ -336,7 +338,18 @@ void R_ViewChanged (vrect_t *vr)
 	r_refdef.vrect = *vr;
 
 	r_refdef.horizontalFieldOfView = 2*tan((float)r_newrefdef.fov_x/360*M_PI);;
-	verticalFieldOfView = 2*tan((float)r_newrefdef.fov_y/360*M_PI);
+	// Knightmare- catch 5:4 modes pushing top and bottom clips beyond screen buffer
+	if ( (r_refdef.vrect.width != r_newrefdef.width || r_refdef.vrect.height != r_newrefdef.height)
+		&& (((float)r_newrefdef.width / (float)r_newrefdef.height) < (640.0f/480.0f)) )
+	{
+		float	x;
+
+		x = r_refdef.vrect.width/tan(r_newrefdef.fov_x/360*M_PI);
+		verticalFieldOfView = 2*(r_refdef.vrect.height/x);
+	}
+	else
+		verticalFieldOfView = 2*tan((float)r_newrefdef.fov_y/360*M_PI);
+	// end Knightmare
 
 	r_refdef.fvrectx = (float)r_refdef.vrect.x;
 	r_refdef.fvrectx_adj = (float)r_refdef.vrect.x - 0.5;
@@ -428,6 +441,7 @@ void R_SetupFrame (void)
 {
 	int			i;
 	vrect_t		vrect;
+	int			adj_warp_height;	// Knightmare added
 
 	if (r_fullbright->modified)
 	{
@@ -461,7 +475,14 @@ void R_SetupFrame (void)
 		vrect.x = 0;
 		vrect.y = 0;
 		vrect.width = r_newrefdef.width < WARP_WIDTH ? r_newrefdef.width : WARP_WIDTH;
-		vrect.height = r_newrefdef.height < WARP_HEIGHT ? r_newrefdef.height : WARP_HEIGHT;
+	//	vrect.height = r_newrefdef.height < WARP_HEIGHT ? r_newrefdef.height : WARP_HEIGHT;
+		// Knightmare- adjust warp height for widescreen aspect ratio
+		if ( ((float)r_newrefdef.width / (float)r_newrefdef.height) > (640.0f/480.0f) )
+			adj_warp_height = (int)( ((float)r_newrefdef.height / (float)r_newrefdef.width) * (float)WARP_WIDTH );
+		else
+			adj_warp_height = WARP_HEIGHT;
+		vrect.height = r_newrefdef.height < adj_warp_height ? r_newrefdef.height : adj_warp_height;
+		// end Knightmare
 
 		d_viewbuffer = r_warpbuffer;
 		r_screenwidth = WARP_WIDTH;
@@ -668,3 +689,49 @@ void R_ScreenShot_f (void)
 	ri.Con_Printf (PRINT_ALL, "Wrote %s\n", checkname);
 } 
 
+
+
+/* 
+================== 
+D_SetParticleSize
+FS: Because particles like blood and bullet
+dust/spray/dunno the term look funny in high res
+================== 
+*/
+void D_SetParticleSize (void)
+{
+	if (sw_particle_size_override->value && sw_particle_size_min->value)
+		d_pix_min = sw_particle_size_min->value;
+//	else if (r_newrefdef.width >= 800)
+//		d_pix_min = 2;
+//	else if (r_newrefdef.width >= 640) // FS: Yeah, this seems weird, but honestly it looks way too big in 640x4XX
+//		d_pix_min = 1;
+	else
+	//	d_pix_min = r_refdef.vrect.width / 320;
+		d_pix_min = r_newrefdef.height / 300;
+
+	if (d_pix_min < 1)
+		d_pix_min = 1;
+
+	if (sw_particle_size_override->value && sw_particle_size_max->value)
+		d_pix_max = sw_particle_size_max->value;
+	else
+//		d_pix_max = (int)((float)r_refdef.vrect.width / (320.0 / 4.0) + 0.5);
+		d_pix_max = (int)((float)r_refdef.vrect.height / (240.0 / 4.0) + 0.5);
+
+	if (d_pix_max < 1)
+		d_pix_max = 1;
+
+	if (sw_particle_size_override->value && sw_particle_size->value)
+		d_pix_shift = sw_particle_size->value;	 // - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
+	else if (r_newrefdef.height >= 1600)
+		d_pix_shift = 11;	 // - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
+	else if (r_newrefdef.height >= 960)
+		d_pix_shift = 10;	 // - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
+	else if (r_newrefdef.height >= 480)
+		d_pix_shift = 9;	 // - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
+	else
+		d_pix_shift = 8;	 // - (int)((float)r_refdef.vrect.width / 320.0 + 0.5);
+
+	d_pix_shift -= (int)((float)r_refdef.vrect.height / 240.0 + 0.5);
+}

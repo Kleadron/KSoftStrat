@@ -49,8 +49,8 @@ void D_WarpScreen (void)
 	byte	**row;
 
 	static int	cached_width, cached_height;
-	static byte	*rowptr[1200+AMP2*2];
-	static int	column[1600+AMP2*2];
+	static byte	*rowptr[2880+AMP2*2];	// Knightmare- was 1200
+	static int	column[5120+AMP2*2];	// Knightmare- was 1600
 
 	//
 	// these are constant over resolutions, and can be saved
@@ -61,13 +61,13 @@ void D_WarpScreen (void)
 	{
 		cached_width = w;
 		cached_height = h;
-		for (v=0 ; v<h+AMP2*2 ; v++)
+		for (v=0; v<h+AMP2*2; v++)
 		{
 			v2 = (int)((float)v/(h + AMP2 * 2) * r_refdef.vrect.height);
 			rowptr[v] = r_warpbuffer + (WARP_WIDTH * v2);
 		}
 
-		for (u=0 ; u<w+AMP2*2 ; u++)
+		for (u=0; u<w+AMP2*2; u++)
 		{
 			u2 = (int)((float)u/(w + AMP2 * 2) * r_refdef.vrect.width);
 			column[u] = u2;
@@ -77,11 +77,11 @@ void D_WarpScreen (void)
 	turb = intsintable + ((int)(r_newrefdef.time*SPEED)&(CYCLE-1));
 	dest = vid.buffer + r_newrefdef.y * vid.rowbytes + r_newrefdef.x;
 
-	for (v=0 ; v<h ; v++, dest += vid.rowbytes)
+	for (v=0; v<h; v++, dest += vid.rowbytes)
 	{
 		col = &column[turb[v]];
 		row = &rowptr[v];
-		for (u=0 ; u<w ; u+=4)
+		for (u=0; u<w; u+=4)
 		{
 			dest[u+0] = row[turb[u+0]][col[u+0]];
 			dest[u+1] = row[turb[u+1]][col[u+1]];

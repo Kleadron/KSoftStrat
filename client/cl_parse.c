@@ -50,124 +50,6 @@ char *svc_strings[256] =
 
 //=============================================================================
 
-void CL_DownloadFileName(char *dest, int destlen, char *fn)
-{
-	if (strncmp(fn, "players", 7) == 0)
-		Com_sprintf (dest, destlen, "%s/%s", BASEDIRNAME, fn);
-	else
-		Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
-}
-
-/*
-===============
-CL_CheckOrDownloadFile
-
-Returns true if the file exists, otherwise it attempts
-to start a download from the server.
-===============
-*/
-qboolean	CL_CheckOrDownloadFile (char *filename)
-{
-	FILE *fp;
-	char	name[MAX_OSPATH];
-
-	if (strstr (filename, ".."))
-	{
-		Com_Printf ("Refusing to download a path with ..\n");
-		return true;
-	}
-
-	if (FS_LoadFile (filename, NULL) != -1)
-	{	// it exists, no need to download
-		return true;
-	}
-
-	strcpy (cls.downloadname, filename);
-
-	// download to a temp name, and only rename
-	// to the real name when done, so if interrupted
-	// a runt file wont be left
-	COM_StripExtension (cls.downloadname, cls.downloadtempname);
-	strcat (cls.downloadtempname, ".tmp");
-
-//ZOID
-	// check to see if we already have a tmp for this file, if so, try to resume
-	// open the file if not opened yet
-	CL_DownloadFileName(name, sizeof(name), cls.downloadtempname);
-
-//	FS_CreatePath (name);
-
-	fp = fopen (name, "r+b");
-	if (fp) { // it exists
-		int len;
-		fseek(fp, 0, SEEK_END);
-		len = ftell(fp);
-
-		cls.download = fp;
-
-		// give the server an offset to start the download
-		Com_Printf ("Resuming %s\n", cls.downloadname);
-		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-		MSG_WriteString (&cls.netchan.message,
-			va("download %s %i", cls.downloadname, len));
-	} else {
-		Com_Printf ("Downloading %s\n", cls.downloadname);
-		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-		MSG_WriteString (&cls.netchan.message,
-			va("download %s", cls.downloadname));
-	}
-
-	cls.downloadnumber++;
-
-	return false;
-}
-
-/*
-===============
-CL_Download_f
-
-Request a download from the server
-===============
-*/
-void	CL_Download_f (void)
-{
-	char filename[MAX_OSPATH];
-
-	if (Cmd_Argc() != 2) {
-		Com_Printf("Usage: download <filename>\n");
-		return;
-	}
-
-	Com_sprintf(filename, sizeof(filename), "%s", Cmd_Argv(1));
-
-	if (strstr (filename, ".."))
-	{
-		Com_Printf ("Refusing to download a path with ..\n");
-		return;
-	}
-
-	if (FS_LoadFile (filename, NULL) != -1)
-	{	// it exists, no need to download
-		Com_Printf("File already exists.\n");
-		return;
-	}
-
-	strcpy (cls.downloadname, filename);
-	Com_Printf ("Downloading %s\n", cls.downloadname);
-
-	// download to a temp name, and only rename
-	// to the real name when done, so if interrupted
-	// a runt file wont be left
-	COM_StripExtension (cls.downloadname, cls.downloadtempname);
-	strcat (cls.downloadtempname, ".tmp");
-
-	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-	MSG_WriteString (&cls.netchan.message,
-		va("download %s", cls.downloadname));
-
-	cls.downloadnumber++;
-}
-
 /*
 ======================
 CL_RegisterSounds
@@ -187,98 +69,6 @@ void CL_RegisterSounds (void)
 		Sys_SendKeyEvents ();	// pump message loop
 	}
 	S_EndRegistration ();
-}
-
-
-/*
-=====================
-CL_ParseDownload
-
-A download message has been received from the server
-=====================
-*/
-void CL_ParseDownload (void)
-{
-	int		size, percent;
-	char	name[MAX_OSPATH];
-	int		r;
-
-	// read the data
-	size = MSG_ReadShort (&net_message);
-	percent = MSG_ReadByte (&net_message);
-	if (size == -1)
-	{
-		Com_Printf ("Server does not have this file.\n");
-		if (cls.download)
-		{
-			// if here, we tried to resume a file but the server said no
-			fclose (cls.download);
-			cls.download = NULL;
-		}
-		CL_RequestNextDownload ();
-		return;
-	}
-
-	// open the file if not opened yet
-	if (!cls.download)
-	{
-		CL_DownloadFileName(name, sizeof(name), cls.downloadtempname);
-
-		FS_CreatePath (name);
-
-		cls.download = fopen (name, "wb");
-		if (!cls.download)
-		{
-			net_message.readcount += size;
-			Com_Printf ("Failed to open %s\n", cls.downloadtempname);
-			CL_RequestNextDownload ();
-			return;
-		}
-	}
-
-	fwrite (net_message.data + net_message.readcount, 1, size, cls.download);
-	net_message.readcount += size;
-
-	if (percent != 100)
-	{
-		// request next block
-// change display routines by zoid
-#if 0
-		Com_Printf (".");
-		if (10*(percent/10) != cls.downloadpercent)
-		{
-			cls.downloadpercent = 10*(percent/10);
-			Com_Printf ("%i%%", cls.downloadpercent);
-		}
-#endif
-		cls.downloadpercent = percent;
-
-		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-		SZ_Print (&cls.netchan.message, "nextdl");
-	}
-	else
-	{
-		char	oldn[MAX_OSPATH];
-		char	newn[MAX_OSPATH];
-
-//		Com_Printf ("100%%\n");
-
-		fclose (cls.download);
-
-		// rename the temp file to it's final name
-		CL_DownloadFileName(oldn, sizeof(oldn), cls.downloadtempname);
-		CL_DownloadFileName(newn, sizeof(newn), cls.downloadname);
-		r = rename (oldn, newn);
-		if (r)
-			Com_Printf ("failed to rename.\n");
-
-		cls.download = NULL;
-		cls.downloadpercent = 0;
-
-		// get another file if needed
-
-		CL_RequestNextDownload ();
-	}
 }
 
 
@@ -327,7 +117,10 @@ void CL_ParseServerData (void)
 	strncpy (cl.gamedir, str, sizeof(cl.gamedir)-1);
 
 	// set gamedir
-	if ((*str && (!fs_gamedirvar->string || !*fs_gamedirvar->string || strcmp(fs_gamedirvar->string, str))) || (!*str && (fs_gamedirvar->string || *fs_gamedirvar->string)))
+//	if ((*str && (!fs_gamedirvar->string || !*fs_gamedirvar->string || strcmp(fs_gamedirvar->string, str))) || (!*str && (fs_gamedirvar->string || *fs_gamedirvar->string)))
+	if ( ( (*str && (!fs_gamedirvar->string || !*fs_gamedirvar->string || strcmp(fs_gamedirvar->string, str)))
+		|| (!*str && (fs_gamedirvar->string || *fs_gamedirvar->string)) )
+		&& !cl.attractloop ) // Knightmare- don't allow demos to change this
 		Cvar_Set("game", str);
 
 	// parse player entity number
@@ -510,6 +303,107 @@ void CL_ParseClientinfo (int player)
 	CL_LoadClientinfo (ci, s);
 }
 
+// Knightmare added
+qboolean FS_ModType (char *name);
+/*
+================
+CL_MissionPackCDTrack
+Returns correct OGG track number for mission packs.
+This assumes that the standard Q2 CD was ripped
+as track02-track11, and the Rogue CD as track12-track21.
+================
+*/
+int CL_MissionPackCDTrack (int tracknum)
+{
+	if (FS_ModType("rogue") || cl_rogue_music->value)
+	{
+		if (tracknum >= 2 && tracknum <= 11)
+			return tracknum + 10;
+		else
+			return tracknum;
+	}
+	// an out-of-order mix from Q2 and Rogue CDs
+	else if (FS_ModType("xatrix") || cl_xatrix_music->value)
+	{
+		switch(tracknum)
+		{
+			case 2: return 9;	break;
+			case 3: return 13;	break;
+			case 4: return 14;	break;
+			case 5: return 7;	break;
+			case 6: return 16;	break;
+			case 7: return 2;	break;
+			case 8: return 15;	break;
+			case 9: return 3;	break;
+			case 10: return 4;	break;
+			case 11: return 18; break;
+			default: return tracknum; break;
+		}
+	}
+	else
+		return tracknum;
+}
+
+/*
+=================
+CL_PlayBackgroundTrack
+=================
+*/
+#ifdef OGG_SUPPORT
+
+#include "snd_ogg.h"
+
+void CL_PlayBackgroundTrack (void)
+{
+	char	name[MAX_QPATH];
+	int		track;
+
+	Com_DPrintf ("CL_PlayBackgroundTrack\n");	// debug
+
+	if (!cl.refresh_prepped)
+		return;
+
+	// using a named audio track intead of numbered
+	if (strlen(cl.configstrings[CS_CDTRACK]) > 2)
+	{
+		Com_sprintf (name, sizeof(name), "music/%s.ogg", cl.configstrings[CS_CDTRACK]);
+		if (FS_LoadFile(name, NULL) != -1)
+		{
+			CDAudio_Stop();
+			S_StartBackgroundTrack(name, name);
+			return;
+		}
+	}
+
+	track = atoi(cl.configstrings[CS_CDTRACK]);
+
+	if (track == 0)
+	{	// Stop any playing track
+		Com_DPrintf ("CL_PlayBackgroundTrack: stopping\n");	// debug
+		CDAudio_Stop();
+		S_StopBackgroundTrack();
+		return;
+	}
+
+	// If an OGG file exists play it, otherwise fall back to CD audio
+	Com_sprintf (name, sizeof(name), "music/track%02i.ogg", CL_MissionPackCDTrack(track));
+	if ( (FS_LoadFile(name, NULL) != -1) && cl_ogg_music->value ) {
+		Com_DPrintf ("CL_PlayBackgroundTrack: playing track %s\n", name);	// debug
+		S_StartBackgroundTrack(name, name);
+	}
+	else
+		CDAudio_Play(track, true);
+}
+
+#else
+
+void CL_PlayBackgroundTrack (void)
+{
+	CDAudio_Play (atoi(cl.configstrings[CS_CDTRACK]), true);
+}
+
+#endif // OGG_SUPPORT
+// end Knightmare
 
 /*
 ================
@@ -520,11 +414,16 @@ void CL_ParseConfigString (void)
 {
 	int		i;
 	char	*s;
+	char	olds[MAX_QPATH];
 
 	i = MSG_ReadShort (&net_message);
 	if (i < 0 || i >= MAX_CONFIGSTRINGS)
 		Com_Error (ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
 	s = MSG_ReadString(&net_message);
+
+	strncpy (olds, cl.configstrings[i], sizeof(olds));
+	olds[sizeof(olds) - 1] = 0;
+
 	strcpy (cl.configstrings[i], s);
 
 	// do something apropriate 
@@ -534,7 +433,8 @@ void CL_ParseConfigString (void)
 	else if (i == CS_CDTRACK)
 	{
 		if (cl.refresh_prepped)
-			CDAudio_Play (atoi(cl.configstrings[CS_CDTRACK]), true);
+		//	CDAudio_Play (atoi(cl.configstrings[CS_CDTRACK]), true);
+			CL_PlayBackgroundTrack ();	// Knightmare changed
 	}
 	else if (i >= CS_MODELS && i < CS_MODELS+MAX_MODELS)
 	{
@@ -559,7 +459,7 @@ void CL_ParseConfigString (void)
 	}
 	else if (i >= CS_PLAYERSKINS && i < CS_PLAYERSKINS+MAX_CLIENTS)
 	{
-		if (cl.refresh_prepped)
+		if (cl.refresh_prepped && strcmp(olds, s))
 			CL_ParseClientinfo (i-CS_PLAYERSKINS);
 	}
 }

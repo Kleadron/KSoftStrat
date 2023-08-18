@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "../client/ref.h"
 
-#define REF_VERSION     "SOFT 0.01"
+#define REF_VERSION     "SOFT 0.02"	// Knightmare- changed version
 
 // up / down
 #define PITCH   0
@@ -159,8 +159,8 @@ extern oldrefdef_t      r_refdef;
 #define MAXWORKINGVERTS (MAXVERTS+4)    // max points in an intermediate
 										//  polygon (while processing)
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
-#define MAXHEIGHT       1200
-#define MAXWIDTH        1600
+#define MAXHEIGHT       2880	// Knightmare- was 1200
+#define MAXWIDTH        5120	// Knightmare- was 1600
 
 #define INFINITE_DISTANCE       0x10000         // distance that's always guaranteed to
 										//  be farther away than anything in
@@ -169,8 +169,8 @@ extern oldrefdef_t      r_refdef;
 
 // d_iface.h: interface header file for rasterization driver modules
 
-#define WARP_WIDTH              320
-#define WARP_HEIGHT             240
+#define WARP_WIDTH              640	// Knightmare- was 320
+#define WARP_HEIGHT             480	// Knightmare- was 240
 
 #define MAX_LBM_HEIGHT  480
 
@@ -450,6 +450,7 @@ extern vec3_t   r_pright, r_pup, r_ppn;
 void D_DrawSurfaces (void);
 void R_DrawParticle( void );
 void D_ViewChanged (void);
+void D_SetParticleSize(void);	// FS: Because particles like blood and bullet dust/spray/dunno the term look funny in high res
 void D_WarpScreen (void);
 void R_PolysetUpdateTables (void);
 
@@ -512,9 +513,11 @@ extern int              r_screenwidth;
 
 extern int              r_drawnpolycount;
 
-extern int      sintable[1280];
-extern int      intsintable[1280];
-extern int		blanktable[1280];		// PGM
+// This must match width of highest supported video mode!
+#define SINTABLESIZE	5120	// Knightmare- was 1280
+extern int      sintable[SINTABLESIZE];
+extern int      intsintable[SINTABLESIZE];
+extern int		blanktable[SINTABLESIZE];		// PGM
 
 extern  vec3_t  vup, base_vup;
 extern  vec3_t  vpn, base_vpn;
@@ -575,6 +578,11 @@ extern cvar_t   *r_lightlevel;  //FIXME HACK
 extern cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
 
+// FS
+extern	cvar_t	*sw_particle_size;			
+extern	cvar_t	*sw_particle_size_min;
+extern	cvar_t	*sw_particle_size_max;
+extern	cvar_t	*sw_particle_size_override;
 
 extern  clipplane_t     view_clipplanes[4];
 extern int              *pfrustum_indexes[4];

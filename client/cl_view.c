@@ -247,7 +247,7 @@ Call before entering a new level, or after changing dlls
 */
 void CL_PrepRefresh (void)
 {
-	char		mapname[32];
+	char		mapname[64];	// Knightmare- increased this
 	int			i;
 	char		name[MAX_QPATH];
 	float		rotate;
@@ -260,7 +260,8 @@ void CL_PrepRefresh (void)
 	SCR_AddDirtyPoint (viddef.width-1, viddef.height-1);
 
 	// let the render dll load the map
-	strcpy (mapname, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
+//	strncpy (mapname, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
+	Q_strncpyz (mapname, cl.configstrings[CS_MODELS+1] + 5, sizeof(mapname));	// skip "maps/"
 	mapname[strlen(mapname)-4] = 0;		// cut off ".bsp"
 
 	// register models, pics, and skins
@@ -278,11 +279,13 @@ void CL_PrepRefresh (void)
 	CL_RegisterTEntModels ();
 
 	num_cl_weaponmodels = 1;
-	strcpy(cl_weaponmodels[0], "weapon.md2");
+//	strncpy (cl_weaponmodels[0], "weapon.md2");
+	Q_strncpyz (cl_weaponmodels[0], "weapon.md2", sizeof(cl_weaponmodels[0]));
 
 	for (i=1 ; i<MAX_MODELS && cl.configstrings[CS_MODELS+i][0] ; i++)
 	{
-		strcpy (name, cl.configstrings[CS_MODELS+i]);
+	//	strncpy (name, cl.configstrings[CS_MODELS+i]);
+		Q_strncpyz (name, cl.configstrings[CS_MODELS+i], sizeof(cl.configstrings[CS_MODELS+i]));
 		name[37] = 0;	// never go beyond one line
 		if (name[0] != '*')
 			Com_Printf ("%s\r", name); 
@@ -352,7 +355,8 @@ void CL_PrepRefresh (void)
 	cl.force_refdef = true;	// make sure we have a valid refdef
 
 	// start the cd track
-	CDAudio_Play (atoi(cl.configstrings[CS_CDTRACK]), true);
+//	CDAudio_Play (atoi(cl.configstrings[CS_CDTRACK]), true);
+	CL_PlayBackgroundTrack ();
 }
 
 /*
@@ -503,6 +507,17 @@ void V_RenderView( float stereo_separation )
 		cl.refdef.y = scr_vrect.y;
 		cl.refdef.width = scr_vrect.width;
 		cl.refdef.height = scr_vrect.height;
+
+		// Knightmare- adjust fov for wide aspect ratio
+		if (cl_widescreen_fov->value)
+		{
+			float aspectRatio = (float)cl.refdef.width/(float)cl.refdef.height;
+			// changed to improved algorithm by Dopefish
+			if (aspectRatio > STANDARD_ASPECT_RATIO)
+				cl.refdef.fov_x = RAD2DEG( 2 * atan( (aspectRatio/ STANDARD_ASPECT_RATIO) * tan(DEG2RAD(cl.refdef.fov_x) * 0.5) ) );
+			//	cl.refdef.fov_x *= (1 + (0.5 * (aspectRatio / STANDARD_ASPECT_RATIO - 1)));
+			cl.refdef.fov_x = min(cl.refdef.fov_x, 160);
+		}
 		cl.refdef.fov_y = CalcFov (cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
 		cl.refdef.time = cl.time*0.001;
 

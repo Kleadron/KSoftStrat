@@ -85,9 +85,19 @@ keyname_t keynames[] =
 	{"HOME", K_HOME},
 	{"END", K_END},
 
+	// Knightmare added
+	{"NUMLOCK", K_NUMLOCK},
+	{"CAPSLOCK", K_CAPSLOCK},
+	{"SCROLLOCK", K_SCROLLOCK},
+	// end Knightmare
+
 	{"MOUSE1", K_MOUSE1},
 	{"MOUSE2", K_MOUSE2},
 	{"MOUSE3", K_MOUSE3},
+	// Knightmare added
+	{"MOUSE4", K_MOUSE4},
+	{"MOUSE5", K_MOUSE5},
+	// end Knightmare
 
 	{"JOY1", K_JOY1},
 	{"JOY2", K_JOY2},
@@ -142,6 +152,7 @@ keyname_t keynames[] =
 	{"KP_SLASH",		K_KP_SLASH },
 	{"KP_MINUS",		K_KP_MINUS },
 	{"KP_PLUS",			K_KP_PLUS },
+	{"KP_MULT",			K_KP_MULT },	// Knightmare added
 
 	{"MWHEELUP", K_MWHEELUP },
 	{"MWHEELDOWN", K_MWHEELDOWN },
@@ -170,7 +181,22 @@ void CompleteCommand (void)
 		s++;
 
 	cmd = Cmd_CompleteCommand (s);
-	if (!cmd)
+	// Knightmare - added command auto-complete
+	if (cmd)
+	{
+		key_lines[edit_line][1] = '/';
+		strcpy (key_lines[edit_line]+2, cmd);
+		key_linepos = strlen(cmd)+2;
+		if (Cmd_IsComplete(cmd)) {
+			key_lines[edit_line][key_linepos] = ' ';
+			key_linepos++;
+			key_lines[edit_line][key_linepos] = 0;
+		} else {
+			key_lines[edit_line][key_linepos] = 0;
+		}
+		return;
+	}
+/*	if (!cmd)
 		cmd = Cvar_CompleteVariable (s);
 	if (cmd)
 	{
@@ -181,8 +207,9 @@ void CompleteCommand (void)
 		key_linepos++;
 		key_lines[edit_line][key_linepos] = 0;
 		return;
-	}
+	}*/
 }
+
 
 /*
 ====================
@@ -198,6 +225,9 @@ void Key_Console (int key)
 	{
 	case K_KP_SLASH:
 		key = '/';
+		break;
+	case K_KP_MULT:
+		key = '*';
 		break;
 	case K_KP_MINUS:
 		key = '-';
@@ -346,13 +376,13 @@ void Key_Console (int key)
 		return;
 	}
 
-	if (key == K_PGUP || key == K_KP_PGUP )
+	if (key == K_PGUP || key == K_KP_PGUP|| key == K_MWHEELUP)
 	{
 		con.display -= 2;
 		return;
 	}
 
-	if (key == K_PGDN || key == K_KP_PGDN ) 
+	if (key == K_PGDN || key == K_KP_PGDN || key == K_MWHEELDOWN) 
 	{
 		con.display += 2;
 		if (con.display > con.current)
@@ -678,6 +708,8 @@ void Key_Init (void)
 	consolekeys[K_KP_PGUP] = true;
 	consolekeys[K_PGDN] = true;
 	consolekeys[K_KP_PGDN] = true;
+    consolekeys[K_KP_MULT] = true;
+
 	consolekeys[K_SHIFT] = true;
 	consolekeys[K_INS] = true;
 	consolekeys[K_KP_INS] = true;
@@ -686,6 +718,9 @@ void Key_Init (void)
 	consolekeys[K_KP_PLUS] = true;
 	consolekeys[K_KP_MINUS] = true;
 	consolekeys[K_KP_5] = true;
+
+	consolekeys[K_MWHEELUP] = true;
+	consolekeys[K_MWHEELDOWN] = true;
 
 	consolekeys['`'] = false;
 	consolekeys['~'] = false;
@@ -784,7 +819,8 @@ void Key_Event (int key, qboolean down, unsigned time)
 	}
 
 	// any key during the attract mode will bring up the menu
-	if (cl.attractloop && cls.key_dest != key_menu)
+	if (cl.attractloop && cls.key_dest != key_menu &&
+		!(key >= K_F1 && key <= K_F12))
 		key = K_ESCAPE;
 
 	// menu key is hardcoded, so the user can never unbind it

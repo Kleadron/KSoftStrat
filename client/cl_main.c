@@ -46,7 +46,16 @@ cvar_t	*cl_timeout;
 cvar_t	*cl_predict;
 //cvar_t	*cl_minfps;
 cvar_t	*cl_maxfps;
+cvar_t	*cl_sleep;	// Knightmare- whether to enable CPU usage fix
 cvar_t	*cl_gun;
+
+// Knightmare- whether to adjust fov for wide aspect rattio
+cvar_t	*cl_widescreen_fov;
+
+// Knightmare- whether to try to play OGGs instead of CD tracks
+cvar_t	*cl_ogg_music;
+cvar_t	*cl_rogue_music; // whether to play Rogue tracks
+cvar_t	*cl_xatrix_music; // whether to play Xatrix tracks
 
 cvar_t	*cl_add_particles;
 cvar_t	*cl_add_lights;
@@ -99,6 +108,19 @@ extern	cvar_t *allow_download_players;
 extern	cvar_t *allow_download_models;
 extern	cvar_t *allow_download_sounds;
 extern	cvar_t *allow_download_maps;
+
+
+/*
+==========================
+ClampCvar
+==========================
+*/
+float ClampCvar (float min, float max, float value)
+{
+	if ( value < min ) return min;
+	if ( value > max ) return max;
+	return value;
+}
 
 //======================================================================
 
@@ -1099,274 +1121,13 @@ void CL_Snd_Restart_f (void)
 	CL_RegisterSounds ();
 }
 
-int precache_check; // for autodownload of precache items
-int precache_spawncount;
-int precache_tex;
-int precache_model_skin;
 
-byte *precache_model; // used for skin checking in alias models
+extern	int precache_check; // for autodownload of precache items
+extern	int precache_spawncount;
+//extern	int precache_tex;
+extern	int precache_model_skin;
+extern	byte *precache_model; // used for skin checking in alias models
 
-#define PLAYER_MULT 5
-
-// ENV_CNT is map load, ENV_CNT+1 is first env map
-#define ENV_CNT (CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT)
-#define TEXTURE_CNT (ENV_CNT+13)
-
-static const char *env_suf[6] = {"rt", "bk", "lf", "ft", "up", "dn"};
-
-void CL_RequestNextDownload (void)
-{
-	unsigned	map_checksum;		// for detecting cheater maps
-	char fn[MAX_OSPATH];
-	dmdl_t *pheader;
-
-	if (cls.state != ca_connected)
-		return;
-
-	if (!allow_download->value && precache_check < ENV_CNT)
-		precache_check = ENV_CNT;
-
-//ZOID
-	if (precache_check == CS_MODELS) { // confirm map
-		precache_check = CS_MODELS+2; // 0 isn't used
-		if (allow_download_maps->value)
-			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
-				return; // started a download
-	}
-	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS) {
-		if (allow_download_models->value) {
-			while (precache_check < CS_MODELS+MAX_MODELS &&
-				cl.configstrings[precache_check][0]) {
-				if (cl.configstrings[precache_check][0] == '*' ||
-					cl.configstrings[precache_check][0] == '#') {
-					precache_check++;
-					continue;
-				}
-				if (precache_model_skin == 0) {
-					if (!CL_CheckOrDownloadFile(cl.configstrings[precache_check])) {
-						precache_model_skin = 1;
-						return; // started a download
-					}
-					precache_model_skin = 1;
-				}
-
-				// checking for skins in the model
-				if (!precache_model) {
-
-					FS_LoadFile (cl.configstrings[precache_check], (void **)&precache_model);
-					if (!precache_model) {
-						precache_model_skin = 0;
-						precache_check++;
-						continue; // couldn't load it
-					}
-					if (LittleLong(*(unsigned *)precache_model) != IDALIASHEADER) {
-						// not an alias model
-						FS_FreeFile(precache_model);
-						precache_model = 0;
-						precache_model_skin = 0;
-						precache_check++;
-						continue;
-					}
-					pheader = (dmdl_t *)precache_model;
-					if (LittleLong (pheader->version) != ALIAS_VERSION) {
-						precache_check++;
-						precache_model_skin = 0;
-						continue; // couldn't load it
-					}
-				}
-
-				pheader = (dmdl_t *)precache_model;
-
-				while (precache_model_skin - 1 < LittleLong(pheader->num_skins)) {
-					if (!CL_CheckOrDownloadFile((char *)precache_model +
-						LittleLong(pheader->ofs_skins) + 
-						(precache_model_skin - 1)*MAX_SKINNAME)) {
-						precache_model_skin++;
-						return; // started a download
-					}
-					precache_model_skin++;
-				}
-				if (precache_model) { 
-					FS_FreeFile(precache_model);
-					precache_model = 0;
-				}
-				precache_model_skin = 0;
-				precache_check++;
-			}
-		}
-		precache_check = CS_SOUNDS;
-	}
-	if (precache_check >= CS_SOUNDS && precache_check < CS_SOUNDS+MAX_SOUNDS) { 
-		if (allow_download_sounds->value) {
-			if (precache_check == CS_SOUNDS)
-				precache_check++; // zero is blank
-			while (precache_check < CS_SOUNDS+MAX_SOUNDS &&
-				cl.configstrings[precache_check][0]) {
-				if (cl.configstrings[precache_check][0] == '*') {
-					precache_check++;
-					continue;
-				}
-				Com_sprintf(fn, sizeof(fn), "sound/%s", cl.configstrings[precache_check++]);
-				if (!CL_CheckOrDownloadFile(fn))
-					return; // started a download
-			}
-		}
-		precache_check = CS_IMAGES;
-	}
-	if (precache_check >= CS_IMAGES && precache_check < CS_IMAGES+MAX_IMAGES) {
-		if (precache_check == CS_IMAGES)
-			precache_check++; // zero is blank
-		while (precache_check < CS_IMAGES+MAX_IMAGES &&
-			cl.configstrings[precache_check][0]) {
-			Com_sprintf(fn, sizeof(fn), "pics/%s.pcx", cl.configstrings[precache_check++]);
-			if (!CL_CheckOrDownloadFile(fn))
-				return; // started a download
-		}
-		precache_check = CS_PLAYERSKINS;
-	}
-	// skins are special, since a player has three things to download:
-	// model, weapon model and skin
-	// so precache_check is now *3
-	if (precache_check >= CS_PLAYERSKINS && precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT) {
-		if (allow_download_players->value) {
-			while (precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT) {
-				int i, n;
-				char model[MAX_QPATH], skin[MAX_QPATH], *p;
-
-				i = (precache_check - CS_PLAYERSKINS)/PLAYER_MULT;
-				n = (precache_check - CS_PLAYERSKINS)%PLAYER_MULT;
-
-				if (!cl.configstrings[CS_PLAYERSKINS+i][0]) {
-					precache_check = CS_PLAYERSKINS + (i + 1) * PLAYER_MULT;
-					continue;
-				}
-
-				if ((p = strchr(cl.configstrings[CS_PLAYERSKINS+i], '\\')) != NULL)
-					p++;
-				else
-					p = cl.configstrings[CS_PLAYERSKINS+i];
-				strcpy(model, p);
-				p = strchr(model, '/');
-				if (!p)
-					p = strchr(model, '\\');
-				if (p) {
-					*p++ = 0;
-					strcpy(skin, p);
-				} else
-					*skin = 0;
-
-				switch (n) {
-				case 0: // model
-					Com_sprintf(fn, sizeof(fn), "players/%s/tris.md2", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 1;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
-
-				case 1: // weapon model
-					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.md2", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 2;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
-
-				case 2: // weapon skin
-					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.pcx", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 3;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
-
-				case 3: // skin
-					Com_sprintf(fn, sizeof(fn), "players/%s/%s.pcx", model, skin);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 4;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
-
-				case 4: // skin_i
-					Com_sprintf(fn, sizeof(fn), "players/%s/%s_i.pcx", model, skin);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 5;
-						return; // started a download
-					}
-					// move on to next model
-					precache_check = CS_PLAYERSKINS + (i + 1) * PLAYER_MULT;
-				}
-			}
-		}
-		// precache phase completed
-		precache_check = ENV_CNT;
-	}
-
-	if (precache_check == ENV_CNT) {
-		precache_check = ENV_CNT + 1;
-
-		CM_LoadMap (cl.configstrings[CS_MODELS+1], true, &map_checksum);
-
-		if (map_checksum != atoi(cl.configstrings[CS_MAPCHECKSUM])) {
-			Com_Error (ERR_DROP, "Local map version differs from server: %i != '%s'\n",
-				map_checksum, cl.configstrings[CS_MAPCHECKSUM]);
-			return;
-		}
-	}
-
-	if (precache_check > ENV_CNT && precache_check < TEXTURE_CNT) {
-		if (allow_download->value && allow_download_maps->value) {
-			while (precache_check < TEXTURE_CNT) {
-				int n = precache_check++ - ENV_CNT - 1;
-
-				if (n & 1)
-					Com_sprintf(fn, sizeof(fn), "env/%s%s.pcx", 
-						cl.configstrings[CS_SKY], env_suf[n/2]);
-				else
-					Com_sprintf(fn, sizeof(fn), "env/%s%s.tga", 
-						cl.configstrings[CS_SKY], env_suf[n/2]);
-				if (!CL_CheckOrDownloadFile(fn))
-					return; // started a download
-			}
-		}
-		precache_check = TEXTURE_CNT;
-	}
-
-	if (precache_check == TEXTURE_CNT) {
-		precache_check = TEXTURE_CNT+1;
-		precache_tex = 0;
-	}
-
-	// confirm existance of textures, download any that don't exist
-	if (precache_check == TEXTURE_CNT+1) {
-		// from qcommon/cmodel.c
-		extern int			numtexinfo;
-		extern mapsurface_t	map_surfaces[];
-
-		if (allow_download->value && allow_download_maps->value) {
-			while (precache_tex < numtexinfo) {
-				char fn[MAX_OSPATH];
-
-				sprintf(fn, "textures/%s.wal", map_surfaces[precache_tex++].rname);
-				if (!CL_CheckOrDownloadFile(fn))
-					return; // started a download
-			}
-		}
-		precache_check = TEXTURE_CNT+999;
-	}
-
-//ZOID
-	CL_RegisterSounds ();
-	CL_PrepRefresh ();
-
-	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-	MSG_WriteString (&cls.netchan.message, va("begin %i\n", precache_spawncount) );
-}
 
 /*
 =================
@@ -1437,6 +1198,16 @@ void CL_InitLocal (void)
 	cl_predict = Cvar_Get ("cl_predict", "1", 0);
 //	cl_minfps = Cvar_Get ("cl_minfps", "5", 0);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "90", 0);
+
+	cl_sleep = Cvar_Get ("cl_sleep", "1", 0);	// Knightmare- whether to enable CPU usage fix
+
+	// Knightmare- whether to adjust fov for wide aspect rattio
+	cl_widescreen_fov = Cvar_Get ("cl_widescreen_fov", "1", CVAR_ARCHIVE);
+
+	// Knightmare- whether to try to play OGGs instead of CD tracks
+	cl_ogg_music = Cvar_Get ("cl_ogg_music", "1", CVAR_ARCHIVE);
+	cl_rogue_music = Cvar_Get ("cl_rogue_music", "0", CVAR_ARCHIVE);
+	cl_xatrix_music = Cvar_Get ("cl_xatrix_music", "0", CVAR_ARCHIVE);
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", 0);
@@ -1517,6 +1288,8 @@ void CL_InitLocal (void)
 
 	Cmd_AddCommand ("download", CL_Download_f);
 
+	Cmd_AddCommand ("writeconfig", CL_WriteConfig_f);	// Knightmare- added writeconfig command
+
 	//
 	// forward to server commands
 	//
@@ -1553,7 +1326,8 @@ CL_WriteConfiguration
 Writes key bindings and archived cvars to config.cfg
 ===============
 */
-void CL_WriteConfiguration (void)
+// Knightmare- this now takes cfgname as a parameter
+void CL_WriteConfiguration (char *cfgName)
 {
 	FILE	*f;
 	char	path[MAX_QPATH];
@@ -1561,21 +1335,50 @@ void CL_WriteConfiguration (void)
 	if (cls.state == ca_uninitialized)
 		return;
 
-	Com_sprintf (path, sizeof(path),"%s/config.cfg",FS_Gamedir());
+//	Com_sprintf (path, sizeof(path),"%s/config.cfg", FS_Gamedir());
+	Com_sprintf (path, sizeof(path),"%s/%s.cfg", FS_Gamedir(), cfgName);
 	f = fopen (path, "w");
 	if (!f)
 	{
-		Com_Printf ("Couldn't write config.cfg.\n");
+	//	Com_Printf ("Couldn't write config.cfg.\n");
+		Com_Printf ("Couldn't write %s.cfg.\n", cfgName);
 		return;
 	}
 
-	fprintf (f, "// generated by quake, do not modify\n");
+	fprintf (f, "// This file is generated by Quake2, do not modify.\n");
+	fprintf (f, "// Use autoexec.cfg for adding custom settings.\n");
 	Key_WriteBindings (f);
 	fclose (f);
 
 	Cvar_WriteVariables (path);
 }
 
+// Knightmare added
+/*
+===============
+CL_WriteConfig_f
+
+===============
+*/
+void CL_WriteConfig_f (void)
+{
+	char cfgName[MAX_QPATH];
+
+	if (Cmd_Argc() == 1 || Cmd_Argc() == 2)
+	{
+		if (Cmd_Argc() == 1)
+			Com_sprintf (cfgName, sizeof(cfgName), "config");
+		else // if (Cmd_Argc() == 2)
+			strncpy (cfgName, Cmd_Argv(1), sizeof(cfgName));
+
+		CL_WriteConfiguration (cfgName);
+		Com_Printf ("Wrote config file %s/%s.cfg.\n", FS_Gamedir(), cfgName);
+	}
+	else
+		Com_Printf ("Usage: writeconfig <name>\n");
+}
+
+//============================================================================
 
 /*
 ==================
@@ -1603,6 +1406,7 @@ cheatvar_t	cheatvars[] = {
 	{"sw_draworder", "0"},
 	{"gl_lightmap", "0"},
 	{"gl_saturatelighting", "0"},
+	{"gl_showbbox", "0"},	// Knightmare- added model bbox option
 	{NULL, NULL}
 };
 
@@ -1689,7 +1493,15 @@ void CL_Frame (int msec)
 		if (cls.state == ca_connected && extratime < 100)
 			return;			// don't flood packets out while connecting
 		if (extratime < 1000/cl_maxfps->value)
+		{	// Knightmare- added Pooy's CPU usage fix
+			if (cl_sleep->value)
+			{
+				int temptime = 1000 / cl_maxfps->value - extratime;
+				if (temptime > 1)
+					Sys_Sleep (1);
+			} // end CPU usage fix
 			return;			// framerate is too high
+		}
 	}
 
 	// let the mouse activate or deactivate
@@ -1833,7 +1645,7 @@ void CL_Shutdown(void)
 	}
 	isdown = true;
 
-	CL_WriteConfiguration (); 
+	CL_WriteConfiguration ("config");	// Knightmare- changed to take config name as a parameter
 
 	CDAudio_Shutdown ();
 	S_Shutdown();
