@@ -332,10 +332,10 @@ void R_DrawTriangleOutlines (msurface_t *surf, qboolean multitexture, qboolean a
 			GL_TexEnv (GL_REPLACE);
 		}
 		else if (multitexture) {
-			GL_SelectTexture (GL_TEXTURE0);
+			GL_SelectTexture ( gl_texture0 );
 			qglGetTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, &tex_state0);
 
-			GL_SelectTexture (GL_TEXTURE1);
+			GL_SelectTexture ( gl_texture1 );
 			qglGetTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, &tex_state1);
 
 			GL_EnableMultitexture(false);
@@ -365,10 +365,10 @@ void R_DrawTriangleOutlines (msurface_t *surf, qboolean multitexture, qboolean a
 		else if (multitexture) {
 			GL_EnableMultitexture(true);
         
-			GL_SelectTexture (GL_TEXTURE0);
+			GL_SelectTexture ( gl_texture0 );
 			GL_TexEnv (tex_state0);
 
-			GL_SelectTexture (GL_TEXTURE1);
+			GL_SelectTexture ( gl_texture1 );
 			GL_TexEnv (tex_state1);
 		}
     }
@@ -827,12 +827,12 @@ void R_DrawTextureChains (void)
 
 		GL_EnableMultitexture(true);
 
-		GL_SelectTexture(gl_texture0);
+		
 		if (!gl_config.mtexcombine)
 		{
+			GL_SelectTexture(gl_texture0);
 			GL_TexEnv(GL_REPLACE);
 			GL_SelectTexture(gl_texture1);
-
 			if (gl_lightmap->value)
 				GL_TexEnv(GL_REPLACE);
 			else
@@ -840,11 +840,19 @@ void R_DrawTextureChains (void)
 		}
 		else
 		{
+			GL_SelectTexture(gl_texture0);
 			GL_TexEnv(GL_COMBINE_EXT);
 			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE);
 			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
 			qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
 			qglTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE);
+
+			if (r_overbrightbits->value)
+			{
+				qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value);
+			}
+			qglTexEnvi(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 1);
+
 			GL_SelectTexture(gl_texture1);
 			GL_TexEnv(GL_COMBINE_EXT);
 
@@ -869,6 +877,7 @@ void R_DrawTextureChains (void)
 			{
 				qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value);
 			}
+			qglTexEnvi(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 1);
 		}
 
 		// ========== Vic overbright code end
@@ -2040,7 +2049,7 @@ void GL_BeginBuildingLightmaps (model_t *m)
 	r_framecount = 1;		// no dlightcache
 
 	GL_EnableMultitexture( true );
-	GL_SelectTexture( GL_TEXTURE1);
+	GL_SelectTexture( gl_texture1 );
 
 	/*
 	** setup the base lightstyles so the lightmaps won't have to be regenerated
