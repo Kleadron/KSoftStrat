@@ -202,10 +202,16 @@ static void ApplyChanges( void *unused )
 
 	Cvar_SetValue ("gl_swapinterval", s_vsync_box.curvalue);
 
-	temp = s_mode_list[SOFTWARE_MENU].curvalue;
-	Cvar_SetValue ("sw_mode", (temp == 0) ? -1 : temp + 2);	// Knightmare- use offset of 2 because of hidden modes
-	temp = s_mode_list[OPENGL_MENU].curvalue;
-	Cvar_SetValue ("gl_mode", (temp == 0) ? -1 : temp + 2);	// Knightmare- use offset of 2 because of hidden modes
+	if (s_current_menu_index == SOFTWARE_MENU)
+	{
+		temp = s_mode_list[SOFTWARE_MENU].curvalue;
+		Cvar_SetValue("sw_mode", (temp == 0) ? -1 : temp + 2);	// Knightmare- use offset of 2 because of hidden modes
+	}
+	else
+	{
+		temp = s_mode_list[OPENGL_MENU].curvalue;
+		Cvar_SetValue("gl_mode", (temp == 0) ? -1 : temp + 2);	// Knightmare- use offset of 2 because of hidden modes
+	}
 
 	if (temp == 0)	// Knightmare- use custom mode fields
 	{
