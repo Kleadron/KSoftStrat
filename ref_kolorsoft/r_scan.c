@@ -426,6 +426,9 @@ FIXME: actually make this subdivide by 16 instead of 8!!!  qb:  OK!!!!
 //qbism: pointer to pbase and macroize idea from mankrip
 #define WRITEPDEST(i)   { pdest[i] = *(pbase + (s >> 16) + (t >> 16) * cachewidth); s+=sstep; t+=tstep;}
 
+// do dither filter
+//#define WRITEPDEST(i)   { unsigned ts = s, tt = t; DitherKernel2(ts, tt, (int)(du + i), (int)dv); pdest[i] = *(pbase + (ts >> 16) + (tt >> 16) * cachewidth); s+=sstep; t+=tstep;}
+
 void D_DrawSpans16(espan_t *pspan) //qb: up it from 8 to 16.  This + unroll = big speed gain!
 {
 	sstep = 0;   // keep compiler happy
