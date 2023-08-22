@@ -491,8 +491,8 @@ void Mod_LoadEdges(lump_t *l)
 		out->v[0] = (unsigned short)LittleShort(in->v[0]);
 		out->v[1] = (unsigned short)LittleShort(in->v[1]);
 		// Knightmare added
-		if (out->v[0] >= loadmodel->numvertexes || out->v[1] >= loadmodel->numvertexes)
-			ri.Sys_Error(ERR_DROP, "Mod_LoadEdges: bad vertexnum");
+		/*if (out->v[0] >= loadmodel->numvertexes || out->v[1] >= loadmodel->numvertexes)
+			ri.Sys_Error(ERR_DROP, "Mod_LoadEdges: bad vertexnum");*/
 	}
 }
 
