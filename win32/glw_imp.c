@@ -181,8 +181,9 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 
 	if (fullscreen)
 	{
-		exstyle = WS_EX_TOPMOST;
+		exstyle = WS_EX_APPWINDOW;
 		stylebits = WS_POPUP|WS_VISIBLE;
+		//stylebits = WINDOW_STYLE;
 	}
 	else
 	{
@@ -194,8 +195,11 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	r.top = 0;
 	r.right  = width;
 	r.bottom = height;
-
-	AdjustWindowRect (&r, stylebits, FALSE);
+	
+	if (!fullscreen)
+	{
+		AdjustWindowRect(&r, stylebits, FALSE);
+	}
 
 	w = r.right - r.left;
 	h = r.bottom - r.top;
@@ -227,19 +231,22 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 	if (!glw_state.hWnd)
 		ri.Sys_Error (ERR_FATAL, "Couldn't create window");
 
-	RECT desk;
-	GetWindowRect(glw_state.hWnd, &r);
-	GetWindowRect(GetDesktopWindow(), &desk);
+	if (!fullscreen)
+	{
+		RECT desk;
+		GetWindowRect(glw_state.hWnd, &r);
+		GetWindowRect(GetDesktopWindow(), &desk);
 
-	int wa, ha, wb, hb;
+		int wa, ha, wb, hb;
 
-	wa = (r.right - r.left) / 2;
-	ha = (r.bottom - r.top) / 2;
+		wa = (r.right - r.left) / 2;
+		ha = (r.bottom - r.top) / 2;
 
-	wb = (desk.right - desk.left) / 2;
-	hb = (desk.bottom - desk.top) / 2;
+		wb = (desk.right - desk.left) / 2;
+		hb = (desk.bottom - desk.top) / 2;
 
-	SetWindowPos(glw_state.hWnd, NULL, wb - wa, hb - ha, r.right - r.left, r.bottom - r.top, 0);
+		SetWindowPos(glw_state.hWnd, NULL, wb - wa, hb - ha, r.right - r.left, r.bottom - r.top, 0);
+	}
 	
 	ShowWindow( glw_state.hWnd, SW_SHOW );
 	UpdateWindow( glw_state.hWnd );
