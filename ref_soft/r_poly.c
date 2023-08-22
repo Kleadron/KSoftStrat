@@ -1059,7 +1059,7 @@ void R_BuildPolygonFromSurface(msurface_t *fa)
 	}
 
 // PGM 09/16/98
-	if ( fa->texinfo->flags & (SURF_WARP|SURF_FLOWING) )
+	if ( fa->texinfo->flags & (SURF_WARP) )
 	{
 		r_polydesc.pixels       = fa->texinfo->image->pixels[0];
 		r_polydesc.pixel_width  = fa->texinfo->image->width;
@@ -1219,9 +1219,9 @@ void R_DrawAlphaSurfaces( void )
 
 		// PGM - pass down all the texinfo flags, not just SURF_WARP.
 		if (s->texinfo->flags & SURF_TRANS66)
-			R_ClipAndDrawPoly( 0.60f, (s->texinfo->flags & SURF_WARP|SURF_FLOWING), true );
+			R_ClipAndDrawPoly( 0.60f, (s->texinfo->flags & SURF_WARP), true );
 		else
-			R_ClipAndDrawPoly( 0.30f, (s->texinfo->flags & SURF_WARP|SURF_FLOWING), true );
+			R_ClipAndDrawPoly( 0.30f, (s->texinfo->flags & SURF_WARP), true );
 //PGM
 //=======
 
