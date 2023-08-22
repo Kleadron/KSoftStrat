@@ -72,6 +72,8 @@ static menulist_s  		s_fs_box[2];
 static menuslider_s		s_screensize_slider[2];
 static menuslider_s		s_brightness_slider[2];
 static menulist_s  		s_stipple_box;
+static menulist_s  		s_texturesmooth_box;
+static menulist_s  		s_transmooth_box;
 
 static menuslider_s		s_tq_slider;
 static menulist_s  		s_paletted_texture_box;
@@ -195,6 +197,8 @@ static void ApplyChanges( void *unused )
 
 	Cvar_SetValue ("vid_gamma", gamma);
 	Cvar_SetValue ("sw_stipplealpha", s_stipple_box.curvalue);
+	Cvar_SetValue("sw_texturesmooth", s_texturesmooth_box.curvalue);
+	Cvar_SetValue("sw_transmooth", s_transmooth_box.curvalue);
 	Cvar_SetValue ("vid_fullscreen", s_fs_box[s_current_menu_index].curvalue);
 	Cvar_SetValue ("gl_picmip", 3 - s_tq_slider.curvalue);
 	Cvar_SetValue ("gl_ext_palettedtexture", s_paletted_texture_box.curvalue);
@@ -673,6 +677,22 @@ void VID_MenuInit( void )
 	s_stipple_box.itemnames		= yesno_names;
 	s_stipple_box.generic.statusbar	= "enables stipple drawing of trans surfaces";
 
+	s_texturesmooth_box.generic.type = MTYPE_SPINCONTROL;
+	s_texturesmooth_box.generic.x = 0;
+	s_texturesmooth_box.generic.y = 110;
+	s_texturesmooth_box.generic.name = "smooth textures";
+	s_texturesmooth_box.curvalue = Cvar_VariableValue("sw_texturesmooth");
+	s_texturesmooth_box.itemnames = yesno_names;
+	s_texturesmooth_box.generic.statusbar = "dithered smoothing of opaque surfaces";
+
+	s_transmooth_box.generic.type = MTYPE_SPINCONTROL;
+	s_transmooth_box.generic.x = 0;
+	s_transmooth_box.generic.y = 120;
+	s_transmooth_box.generic.name = "smooth transparents";
+	s_transmooth_box.curvalue = Cvar_VariableValue("sw_transmooth");
+	s_transmooth_box.itemnames = yesno_names;
+	s_transmooth_box.generic.statusbar = "dithered smoothing of transparent surfaces (KolorSoft renderer)";
+
 	s_tq_slider.generic.type			= MTYPE_SLIDER;
 	s_tq_slider.generic.x				= 0;
 	s_tq_slider.generic.y				= 100;
@@ -748,6 +768,8 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_software_menu, ( void * ) &s_screensize_slider[SOFTWARE_MENU] );
 	Menu_AddItem( &s_software_menu, ( void * ) &s_brightness_slider[SOFTWARE_MENU] );
 	Menu_AddItem( &s_software_menu, ( void * ) &s_stipple_box );
+	Menu_AddItem(&s_software_menu, (void *)&s_texturesmooth_box);
+	Menu_AddItem(&s_software_menu, (void *)&s_transmooth_box);
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ref_list[OPENGL_MENU] );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list[OPENGL_MENU] );
