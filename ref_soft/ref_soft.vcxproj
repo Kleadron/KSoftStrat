@@ -97,7 +97,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;WIN32;_WINDOWS;C_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>.\debug/ref_soft.pch</PrecompiledHeaderOutputFile>
@@ -146,8 +146,8 @@
     </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;C_ONLY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -307,8 +307,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="r_draw16.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">true</ExcludedFromBuild>
@@ -319,8 +319,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="r_drawa.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">true</ExcludedFromBuild>
@@ -331,8 +331,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="r_edgea.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">true</ExcludedFromBuild>
@@ -343,8 +343,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="r_polysa.asm">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
@@ -353,8 +353,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
@@ -367,8 +367,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="r_spr8.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">true</ExcludedFromBuild>
@@ -379,8 +379,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="r_surf8.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">true</ExcludedFromBuild>
@@ -391,8 +391,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="r_varsa.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">true</ExcludedFromBuild>
@@ -403,8 +403,8 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ml /c /Cp /coff /Fo$(OutDir)%(Filename).obj /Zm /Zi %(FullPath)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).obj;%(Outputs)</Outputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -417,6 +417,7 @@
     <ClInclude Include="adivtab.h" />
     <ClInclude Include="anorms.h" />
     <ClInclude Include="rand1k.h" />
+    <ClInclude Include="r_dither.h" />
     <ClInclude Include="r_local.h" />
     <ClInclude Include="r_model.h" />
   </ItemGroup>
