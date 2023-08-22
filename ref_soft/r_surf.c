@@ -52,7 +52,8 @@ void R_BuildLightMap (void);
 extern	unsigned		blocklights[1024];	// allow some very large lightmaps
 
 float           surfscale;
-qboolean        r_cache_thrash;         // set if surface cache is thrashing
+//qboolean        r_cache_thrash;         // set if surface cache is thrashing
+// changed to cvar
 
 int         sc_size;
 surfcache_t	*sc_rover, *sc_base;
@@ -509,7 +510,7 @@ surfcache_t     *D_SCAlloc (int width, int size)
 	if (d_roverwrapped)
 	{
 		if (wrapped_this_time || (sc_rover >= d_initial_rover))
-			r_cache_thrash = true;
+			r_cache_thrash->value = 1; //r_cache_thrash = true;
 	}
 	else if (wrapped_this_time)
 	{       

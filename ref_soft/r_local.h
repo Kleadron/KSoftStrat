@@ -487,6 +487,7 @@ extern  fixed16_t       bbextents, bbextentt;
 
 
 void D_DrawSpans16 (espan_t *pspans);
+void D_DrawSpans16Dithered (espan_t *pspans);
 void D_DrawZSpans (espan_t *pspans);
 void Turbulent8 (espan_t *pspan);
 void NonTurbulent8 (espan_t *pspan);	//PGM
@@ -565,6 +566,7 @@ extern cvar_t   *sw_reportedgeout;
 extern cvar_t   *sw_stipplealpha;
 extern cvar_t   *sw_surfcacheoverride;
 extern cvar_t   *sw_waterwarp;
+extern cvar_t   *sw_texturesmooth;
 
 extern cvar_t   *r_fullbright;
 extern cvar_t	*r_lefthand;
@@ -585,6 +587,8 @@ extern	cvar_t	*sw_particle_size;
 extern	cvar_t	*sw_particle_size_min;
 extern	cvar_t	*sw_particle_size_max;
 extern	cvar_t	*sw_particle_size_override;
+
+extern	cvar_t	*r_cache_thrash;
 
 extern  clipplane_t     view_clipplanes[4];
 extern int              *pfrustum_indexes[4];

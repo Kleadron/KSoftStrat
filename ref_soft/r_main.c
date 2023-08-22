@@ -123,6 +123,7 @@ cvar_t	*sw_reportsurfout;
 cvar_t  *sw_stipplealpha;
 cvar_t	*sw_surfcacheoverride;
 cvar_t	*sw_waterwarp;
+cvar_t	*sw_texturesmooth;
 
 cvar_t	*r_drawworld;
 cvar_t	*r_drawentities;
@@ -142,6 +143,8 @@ cvar_t	*sw_particle_size;
 cvar_t	*sw_particle_size_min;
 cvar_t	*sw_particle_size_max;
 cvar_t	*sw_particle_size_override;
+
+cvar_t	*r_cache_thrash;
 
 //PGM
 cvar_t	*sw_lockpvs;
@@ -266,6 +269,7 @@ void R_Register (void)
 	sw_surfcacheoverride = ri.Cvar_Get ("sw_surfcacheoverride", "0", 0);
 	sw_waterwarp = ri.Cvar_Get ("sw_waterwarp", "1", 0);
 	sw_mode = ri.Cvar_Get( "sw_mode", "3", CVAR_ARCHIVE );	// Knightmare- changed default to 3, 640x480
+	sw_texturesmooth = ri.Cvar_Get("sw_texturesmooth", "0", CVAR_ARCHIVE);
 
 	r_lefthand = ri.Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 	r_speeds = ri.Cvar_Get ("r_speeds", "0", 0);
@@ -285,6 +289,8 @@ void R_Register (void)
 	sw_particle_size_min = ri.Cvar_Get ("sw_particle_size_min", "1", CVAR_ARCHIVE);
 	sw_particle_size_max = ri.Cvar_Get ("sw_particle_size_max", "8.5", CVAR_ARCHIVE);
 	sw_particle_size_override = ri.Cvar_Get ("sw_particle_size_override", "0", CVAR_ARCHIVE);
+
+	r_cache_thrash = ri.Cvar_Get("r_cache_thrash", "0", 0);
 
 	ri.Cmd_AddCommand ("modellist", Mod_Modellist_f);
 	ri.Cmd_AddCommand( "screenshot", R_ScreenShot_f );

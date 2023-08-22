@@ -511,6 +511,8 @@ void R_SetupFrame (void)
 	VectorCopy (vright, base_vright);
 	VectorCopy (vup, base_vup);
 
+	r_cache_thrash->value = false;
+
 // clear frame counts
 	c_faceclip = 0;
 	d_spanpixcount = 0;

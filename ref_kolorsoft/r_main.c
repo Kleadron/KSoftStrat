@@ -130,6 +130,7 @@ cvar_t	*sw_surfcacheoverride;
 cvar_t	*sw_waterwarp;
 cvar_t  *sw_transmooth; // texture dither //qb: was sw_texturesmooth, but just transparencies
 //cvar_t  *sw_transquality; //qb: from engoo - selects which table to use.
+cvar_t	*sw_texturesmooth;
 
 cvar_t	*r_drawworld;
 cvar_t	*r_drawentities;
@@ -154,6 +155,8 @@ cvar_t  *r_customheight;
 cvar_t	*r_coloredlights; // leilei
 cvar_t	*r_lightsaturation; //qb: colored light saturation
 int		coloredlights;	  // leilei
+
+cvar_t	*r_cache_thrash;
 
 #define	STRINGER(x) "x"
 
@@ -276,6 +279,7 @@ void R_Register(void)
 	sw_mode = ri.Cvar_Get("sw_mode", "4", CVAR_ARCHIVE);
 	sw_transmooth = ri.Cvar_Get("sw_transmooth", "0", CVAR_ARCHIVE);
 	//sw_transquality = ri.Cvar_Get("sw_transquality", "1", CVAR_ARCHIVE);
+	sw_texturesmooth = ri.Cvar_Get("sw_texturesmooth", "0", CVAR_ARCHIVE);
 
 	r_lefthand = ri.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);
 	r_speeds = ri.Cvar_Get("r_speeds", "0", 0);
@@ -289,6 +293,8 @@ void R_Register(void)
 
 	vid_fullscreen = ri.Cvar_Get("vid_fullscreen", "0", CVAR_ARCHIVE);
 	vid_gamma = ri.Cvar_Get("vid_gamma", "1.0", CVAR_ARCHIVE);
+
+	r_cache_thrash = ri.Cvar_Get("r_cache_thrash", "0", 0);
 
 	ri.Cmd_AddCommand("modellist", Mod_Modellist_f);
 	ri.Cmd_AddCommand("screenshot", R_ScreenShot_f);

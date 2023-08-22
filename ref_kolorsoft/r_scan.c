@@ -427,7 +427,7 @@ FIXME: actually make this subdivide by 16 instead of 8!!!  qb:  OK!!!!
 #define WRITEPDEST(i)   { pdest[i] = *(pbase + (s >> 16) + (t >> 16) * cachewidth); s+=sstep; t+=tstep;}
 
 // do dither filter
-//#define WRITEPDEST(i)   { unsigned ts = s, tt = t; DitherKernel2(ts, tt, (int)(du + i), (int)dv); pdest[i] = *(pbase + (ts >> 16) + (tt >> 16) * cachewidth); s+=sstep; t+=tstep;}
+#define WRITEPDEST_DITHER(i)   { unsigned ts = s, tt = t; DitherKernel2(ts, tt, (int)(du + i), (int)dv); ts = ts >> 16; ts = ts ? ts - 1 : ts; tt = tt >> 16; tt = tt ? tt - 1 : tt; pdest[i] = *(pbase + ts + tt * cachewidth); s+=sstep; t+=tstep;}
 
 void D_DrawSpans16(espan_t *pspan) //qb: up it from 8 to 16.  This + unroll = big speed gain!
 {
@@ -565,6 +565,142 @@ void D_DrawSpans16(espan_t *pspan) //qb: up it from 8 to 16.  This + unroll = bi
 }
 
 #endif
+
+// dithered version
+void D_DrawSpans16Dithered(espan_t *pspan) //qb: up it from 8 to 16.  This + unroll = big speed gain!
+{
+	sstep = 0;   // keep compiler happy
+	tstep = 0;   // ditto
+
+	pbase = (byte *)cacheblock;
+	sdivzstepu = d_sdivzstepu * 16;
+	tdivzstepu = d_tdivzstepu * 16;
+	zistepu = d_zistepu * 16;
+
+	do
+	{
+		pdest = (byte *)((byte *)d_viewbuffer + (r_screenwidth * pspan->v) + pspan->u);
+		count = pspan->count >> 4;
+
+		spancount = pspan->count % 16;
+
+		// calculate the initial s/z, t/z, 1/z, s, and t and clamp
+		du = (float)pspan->u;
+		dv = (float)pspan->v;
+
+		sdivz = d_sdivzorigin + dv * d_sdivzstepv + du * d_sdivzstepu;
+		tdivz = d_tdivzorigin + dv * d_tdivzstepv + du * d_tdivzstepu;
+		zi = d_ziorigin + dv * d_zistepv + du * d_zistepu;
+		z = (float)0x10000 / zi;   // prescale to 16.16 fixed-point
+
+		s = (int)(sdivz * z) + sadjust;
+		if (s < 0) s = 0;
+		else if (s > bbextents) s = bbextents;
+
+		t = (int)(tdivz * z) + tadjust;
+		if (t < 0) t = 0;
+		else if (t > bbextentt) t = bbextentt;
+
+		while (count-- > 0) // Manoel Kasimier
+		{
+			sdivz += sdivzstepu;
+			tdivz += tdivzstepu;
+			zi += zistepu;
+			z = (float)0x10000 / zi;   // prescale to 16.16 fixed-point
+
+			snext = (int)(sdivz * z) + sadjust;
+			if (snext < 16) snext = 16;
+			else if (snext > bbextents) snext = bbextents;
+
+			tnext = (int)(tdivz * z) + tadjust;
+			if (tnext < 16) tnext = 16;
+			else if (tnext > bbextentt) tnext = bbextentt;
+
+			sstep = (snext - s) >> 4;
+			tstep = (tnext - t) >> 4;
+			pdest += 16;
+			WRITEPDEST_DITHER(-16);
+			WRITEPDEST_DITHER(-15);
+			WRITEPDEST_DITHER(-14);
+			WRITEPDEST_DITHER(-13);
+			WRITEPDEST_DITHER(-12);
+			WRITEPDEST_DITHER(-11);
+			WRITEPDEST_DITHER(-10);
+			WRITEPDEST_DITHER(-9);
+			WRITEPDEST_DITHER(-8);
+			WRITEPDEST_DITHER(-7);
+			WRITEPDEST_DITHER(-6);
+			WRITEPDEST_DITHER(-5);
+			WRITEPDEST_DITHER(-4);
+			WRITEPDEST_DITHER(-3);
+			WRITEPDEST_DITHER(-2);
+			WRITEPDEST_DITHER(-1);
+			s = snext;
+			t = tnext;
+		}
+		if (spancount > 0)
+		{
+			spancountminus1 = (float)(spancount - 1);
+			sdivz += d_sdivzstepu * spancountminus1;
+			tdivz += d_tdivzstepu * spancountminus1;
+			zi += d_zistepu * spancountminus1;
+			z = (float)0x10000 / zi;   // prescale to 16.16 fixed-point
+
+			snext = (int)(sdivz * z) + sadjust;
+			if (snext < 16) snext = 16;
+			else if (snext > bbextents) snext = bbextents;
+
+			tnext = (int)(tdivz * z) + tadjust;
+			if (tnext < 16) tnext = 16;
+			else if (tnext > bbextentt) tnext = bbextentt;
+
+			if (spancount > 1)
+			{
+				sstep = (snext - s) / (spancount - 1);
+				tstep = (tnext - t) / (spancount - 1);
+			}
+
+			pdest += spancount;
+
+			switch (spancount)
+			{
+			case 16:
+				WRITEPDEST_DITHER(-16);
+			case 15:
+				WRITEPDEST_DITHER(-15);
+			case 14:
+				WRITEPDEST_DITHER(-14);
+			case 13:
+				WRITEPDEST_DITHER(-13);
+			case 12:
+				WRITEPDEST_DITHER(-12);
+			case 11:
+				WRITEPDEST_DITHER(-11);
+			case 10:
+				WRITEPDEST_DITHER(-10);
+			case  9:
+				WRITEPDEST_DITHER(-9);
+			case  8:
+				WRITEPDEST_DITHER(-8);
+			case  7:
+				WRITEPDEST_DITHER(-7);
+			case  6:
+				WRITEPDEST_DITHER(-6);
+			case  5:
+				WRITEPDEST_DITHER(-5);
+			case  4:
+				WRITEPDEST_DITHER(-4);
+			case  3:
+				WRITEPDEST_DITHER(-3);
+			case  2:
+				WRITEPDEST_DITHER(-2);
+			case  1:
+				WRITEPDEST_DITHER(-1);
+				break;
+			}
+		}
+	} while ((pspan = pspan->pnext) != NULL);
+}
 
 
 #if	!id386

@@ -48,6 +48,11 @@ vrect_t		scr_vrect;		// position of render window on screen
 cvar_t		*scr_viewsize;
 cvar_t		*scr_conspeed;
 cvar_t		*scr_centertime;
+
+// added back by Kleadron
+cvar_t		*scr_showram;
+cvar_t		*r_cache_thrash; // made into a cvar I guess
+
 cvar_t		*scr_showturtle;
 cvar_t		*scr_showpause;
 cvar_t		*scr_printspeed;
@@ -478,6 +483,10 @@ void SCR_Init (void)
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);	// Knightmare added
 	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE);
 	scr_conspeed = Cvar_Get ("scr_conspeed", "3", 0);
+
+	r_cache_thrash = Cvar_Get("r_cache_thrash", "0", 0);
+	scr_showram = Cvar_Get ("scr_showram", "1", 0);
+
 	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);
 	scr_showpause = Cvar_Get ("scr_showpause", "1", 0);
 	scr_centertime = Cvar_Get ("scr_centertime", "2.5", 0);
@@ -502,6 +511,22 @@ void SCR_Init (void)
 	scr_initialized = true;
 }
 
+
+/*
+==============
+SCR_DrawRam
+==============
+*/
+void SCR_DrawRam(void)
+{
+	if (!scr_showram->value)
+		return;
+
+	if (!r_cache_thrash->value)
+		return;
+
+	re.DrawPic(scr_vrect.x + 32, scr_vrect.y, "ram");
+}
 
 /*
 ==============
@@ -1455,6 +1480,9 @@ void SCR_UpdateScreen (void)
 				SCR_DrawLayout ();
 			if (cl.frame.playerstate.stats[STAT_LAYOUTS] & 2)
 				CL_DrawInventory ();
+
+			// added back by Kleadron
+			SCR_DrawRam();
 
 			SCR_DrawTurtle ();
 			SCR_DrawNet ();
