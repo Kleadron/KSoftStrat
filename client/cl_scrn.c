@@ -487,7 +487,7 @@ void SCR_Init (void)
 	r_cache_thrash = Cvar_Get("r_cache_thrash", "0", 0);
 	scr_showram = Cvar_Get ("scr_showram", "1", 0);
 
-	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);
+	scr_showturtle = Cvar_Get ("scr_showturtle", "1", 0);
 	scr_showpause = Cvar_Get ("scr_showpause", "1", 0);
 	scr_centertime = Cvar_Get ("scr_centertime", "2.5", 0);
 	scr_printspeed = Cvar_Get ("scr_printspeed", "8", 0);
@@ -540,7 +540,7 @@ void SCR_DrawTurtle (void)
 	if (!scr_showturtle->value)
 		return;
 
-	if (cls.frametime < 0.1)
+	if (cls.frametime < 0.05)
 	{
 		slowframes = 0;
 		return;
