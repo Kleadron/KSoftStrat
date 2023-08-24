@@ -1612,6 +1612,24 @@ void SP_target_string (edict_t *self)
 }
 
 
+// Kleadron Software target_changemusic
+void target_changemusic_use(edict_t *self, edict_t *other, edict_t *activator)
+{
+	if (self->musictrack && strlen(self->musictrack))
+	{
+		if (self->musictrack && strlen(self->musictrack))
+			gi.configstring(CS_CDTRACK, self->musictrack);
+		else
+			gi.configstring(CS_CDTRACK, va("%i", self->sounds));
+	}
+}
+
+void SP_target_changemusic(edict_t *self)
+{
+	self->use = target_changemusic_use;
+}
+
+
 /*QUAKED func_clock (0 0 1) (-8 -8 -8) (8 8 8) TIMER_UP TIMER_DOWN START_OFF MULTI_USE
 target a target_string with this
 
