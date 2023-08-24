@@ -443,6 +443,7 @@ extern int              r_framecount;           // sequence # of current frame s
 extern float    r_aliasuvscale;         // scale-up factor for screen u and v
 									//  on Alias vertices passed to driver
 extern qboolean r_dowarp;
+extern qboolean r_soretro;
 
 extern affinetridesc_t  r_affinetridesc;
 
@@ -453,6 +454,7 @@ void R_DrawParticle( void );
 void D_ViewChanged (void);
 void D_SetParticleSize(void);	// FS: Because particles like blood and bullet dust/spray/dunno the term look funny in high res
 void D_WarpScreen (void);
+void D_RescaleScreenPixels(void);
 void R_PolysetUpdateTables (void);
 
 extern void *acolormap; // FIXME: should go away
@@ -567,6 +569,7 @@ extern cvar_t   *sw_stipplealpha;
 extern cvar_t   *sw_surfcacheoverride;
 extern cvar_t   *sw_waterwarp;
 extern cvar_t   *sw_texturesmooth;
+extern cvar_t   *sw_soretro;
 
 extern cvar_t   *r_fullbright;
 extern cvar_t	*r_lefthand;

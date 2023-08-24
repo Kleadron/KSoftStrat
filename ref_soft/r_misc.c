@@ -472,7 +472,9 @@ void R_SetupFrame (void)
 	else
 		r_dowarp = false;
 
-	if (r_dowarp)
+	r_soretro = sw_soretro->value;
+
+	if (r_dowarp || r_soretro)
 	{	// warp into off screen buffer
 		vrect.x = 0;
 		vrect.y = 0;

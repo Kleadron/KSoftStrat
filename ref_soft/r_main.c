@@ -53,6 +53,7 @@ int			r_outofsurfaces;
 int			r_outofedges;
 
 qboolean	r_dowarp;
+qboolean	r_soretro;
 
 mvertex_t	*r_pcurrentvertbase;
 
@@ -124,6 +125,7 @@ cvar_t  *sw_stipplealpha;
 cvar_t	*sw_surfcacheoverride;
 cvar_t	*sw_waterwarp;
 cvar_t	*sw_texturesmooth;
+cvar_t	*sw_soretro;
 
 cvar_t	*r_drawworld;
 cvar_t	*r_drawentities;
@@ -270,6 +272,7 @@ void R_Register (void)
 	sw_waterwarp = ri.Cvar_Get ("sw_waterwarp", "1", 0);
 	sw_mode = ri.Cvar_Get( "sw_mode", "3", CVAR_ARCHIVE );	// Knightmare- changed default to 3, 640x480
 	sw_texturesmooth = ri.Cvar_Get("sw_texturesmooth", "0", CVAR_ARCHIVE);
+	sw_soretro = ri.Cvar_Get("sw_soretro", "0", CVAR_ARCHIVE);
 
 	r_lefthand = ri.Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 	r_speeds = ri.Cvar_Get ("r_speeds", "0", 0);
@@ -1053,6 +1056,9 @@ void R_RenderFrame (refdef_t *fd)
 
 	if (r_dowarp)
 		D_WarpScreen ();
+
+	if (!r_dowarp && r_soretro)
+		D_RescaleScreenPixels();
 
 	if (r_dspeeds->value)
 		da_time1 = Sys_Milliseconds ();

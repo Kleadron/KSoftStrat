@@ -93,6 +93,64 @@ void D_WarpScreen (void)
 	}
 }
 
+/*
+=============
+D_RescaleScreenPixels
+
+This function takes the virtual screen size and remaps it to
+the actual screen size, to 
+=============
+*/
+void D_RescaleScreenPixels(void)
+{
+	int		w, h;
+	int		u, v, u2, v2;
+	byte	*dest;
+	int		*turb;
+	int		*col;
+	byte	**row;
+
+	static int	cached_width, cached_height;
+	static byte	*rowptr[2880 + AMP2 * 2];	// Knightmare- was 1200
+	static int	column[5120 + AMP2 * 2];	// Knightmare- was 1600
+
+	//
+	// these are constant over resolutions, and can be saved
+	//
+	w = r_newrefdef.width;
+	h = r_newrefdef.height;
+	if (w != cached_width || h != cached_height)
+	{
+		cached_width = w;
+		cached_height = h;
+		for (v = 0; v < h + AMP2 * 2; v++)
+		{
+			v2 = (int)((float)v / (h + AMP2 * 2) * r_refdef.vrect.height);
+			rowptr[v] = r_warpbuffer + (WARP_WIDTH * v2);
+		}
+
+		for (u = 0; u < w + AMP2 * 2; u++)
+		{
+			u2 = (int)((float)u / (w + AMP2 * 2) * r_refdef.vrect.width);
+			column[u] = u2;
+		}
+	}
+
+	dest = vid.buffer + r_newrefdef.y * vid.rowbytes + r_newrefdef.x;
+
+	for (v = 0; v < h; v++, dest += vid.rowbytes)
+	{
+		col = &column[0];
+		row = &rowptr[v];
+		for (u = 0; u < w; u += 4)
+		{
+			dest[u + 0] = row[0][col[u + 0]];
+			dest[u + 1] = row[0][col[u + 1]];
+			dest[u + 2] = row[0][col[u + 2]];
+			dest[u + 3] = row[0][col[u + 3]];
+		}
+	}
+}
 
 #if	!id386
 
