@@ -10,13 +10,13 @@ REM pushd tools\mapcompilers2\Windows64
 
 rem copy .\ksoft\maps\%map%.map .\working
 echo --------------QBSP--------------
-tools\q2tool.exe -bsp -moddir ksoft/ -basedir baseq2/ ksoft\maps\%map% 
+tools\ericw-tools\qbsp.exe -q2bsp -basedir baseq2/ -gamedir ksoft/ ksoft\maps\%map% 
 
 echo --------------VIS---------------
-tools\q2tool.exe -vis -moddir ksoft/ -basedir baseq2/ ksoft\maps\%map% 
+tools\ericw-tools\vis.exe -basedir baseq2/ -gamedir ksoft/ ksoft\maps\%map% 
 
 echo -------------LIGHT--------------
-tools\q2tool.exe -rad -moddir ksoft/ -basedir baseq2/ ksoft\maps\%map%
+tools\ericw-tools\light.exe -basedir baseq2/ -gamedir ksoft/ -emissivequality high ksoft\maps\%map%
 
 rem copy .\working\%map%.bsp .\ksoft\maps
 
