@@ -39,6 +39,7 @@ typedef float vec4_t[4];
 
 static	vec4_t	s_lerped[MAX_VERTS];
 //static	vec3_t	lerped[MAX_VERTS];
+static	vec4_t	s_lerpednormals[MAX_VERTS];
 
 vec3_t	shadevector;
 float	shadelight[3];
@@ -79,6 +80,34 @@ void GL_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 
 }
 
+void GL_LerpNormals(int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float front, float back)
+{
+	int i;
+
+	for (i = 0; i < nverts; i++, v++, ov++, lerp += 4)
+	{
+		float *oldnormal = r_avertexnormals[ov->lightnormalindex];
+		float *normal = r_avertexnormals[v->lightnormalindex];
+		lerp[0] = (oldnormal[0] * back) + (normal[0] * front);
+		lerp[1] = (oldnormal[1] * back) + (normal[1] * front);
+		lerp[2] = (oldnormal[2] * back) + (normal[2] * front);
+
+		// normalize normal!
+		float length, ilength;
+
+		length = lerp[0] * lerp[0] + lerp[1] * lerp[1] + lerp[2] * lerp[2];
+		length = sqrt(length);
+
+		if (length)
+		{
+			ilength = 1 / length;
+			lerp[0] *= ilength;
+			lerp[1] *= ilength;
+			lerp[2] *= ilength;
+		}
+	}
+}
+
 /*
 =============
 GL_DrawAliasFrameLerp
@@ -87,7 +116,7 @@ interpolates between two frames and origins
 FIXME: batch lerp all vertexes
 =============
 */
-void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
+void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnormals)
 {
 	float 	l;
 	daliasframe_t	*frame, *oldframe;
@@ -101,6 +130,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	int		i;
 	int		index_xyz;
 	float	*lerp;
+	float	*lerpnormals;
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
 		+ currententity->frame * paliashdr->framesize);
@@ -148,12 +178,19 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	}
 
 	lerp = s_lerped[0];
+	lerpnormals = s_lerpednormals[0];
+
+	if (calcnormals)
+	{
+		GL_LerpNormals(paliashdr->num_xyz, v, ov, verts, lerpnormals, frontlerp, backlerp);
+	}
 
 	GL_LerpVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv );
 
 	if ( gl_vertex_arrays->value )
 	{
 		float colorArray[MAX_VERTS*4];
+		float normalArray[MAX_VERTS*4];
 
 		qglEnableClientState( GL_VERTEX_ARRAY );
 		qglVertexPointer( 3, GL_FLOAT, 16, s_lerped );	// padded for SIMD
@@ -180,6 +217,21 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				colorArray[i*3+1] = l * shadelight[1];
 				colorArray[i*3+2] = l * shadelight[2];
 			}
+		}
+
+		if (calcnormals)
+		{
+			qglEnableClientState(GL_NORMAL_ARRAY);
+			qglNormalPointer(GL_FLOAT, 16, lerpnormals);
+
+			//for (i = 0; i < paliashdr->num_xyz; i++)
+			//{
+			//	float *n = r_avertexnormals[verts[i].lightnormalindex];
+
+			//	normalArray[i * 3 + 0] = n[0];
+			//	normalArray[i * 3 + 1] = n[1];
+			//	normalArray[i * 3 + 2] = n[2];
+			//}
 		}
 
 		if ( qglLockArraysEXT != 0 )
@@ -236,6 +288,11 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 		if ( qglUnlockArraysEXT != 0 )
 			qglUnlockArraysEXT();
+
+		if (calcnormals)
+		{
+			qglDisableClientState(GL_NORMAL_ARRAY);
+		}
 	}
 	else
 	{
@@ -280,6 +337,10 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					l = shadedots[verts[index_xyz].lightnormalindex];
 					
 					qglColor4f (l* shadelight[0], l*shadelight[1], l*shadelight[2], alpha);
+					if (calcnormals)
+					{
+						qglNormal3fv(s_lerpednormals[index_xyz]);
+					}
 					qglVertex3fv (s_lerped[index_xyz]);
 				} while (--count);
 			}
@@ -892,7 +953,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	if ( !r_lerpmodels->value || currententity->flags & RF_MUZZLEFLASH )
 		currententity->backlerp = 0;
-	GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp);
+	GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp, skin->is_envmap);
 
 	if (r_worldmodel->lightdata && gl_config.mtexcombine)
 	{
