@@ -202,21 +202,21 @@ void CL_RegisterTEntModels (void)
 	cl_mod_bfg_explo = re.RegisterModel ("sprites/s_bfg2.sp2");
 	cl_mod_powerscreen = re.RegisterModel ("models/items/armor/effect/tris.md2");
 
-re.RegisterModel ("models/objects/laser/tris.md2");
-re.RegisterModel ("models/objects/grenade2/tris.md2");
-re.RegisterModel ("models/weapons/v_machn/tris.md2");
-re.RegisterModel ("models/weapons/v_handgr/tris.md2");
-re.RegisterChainedModel ("models/weapons/v_shotg2/tris.md2", "models/weapons/v_shotg2/tris_chrome.md2");
-re.RegisterModel ("models/objects/gibs/bone/tris.md2");
-re.RegisterModel ("models/objects/gibs/sm_meat/tris.md2");
-re.RegisterModel ("models/objects/gibs/bone2/tris.md2");
-// RAFAEL
-// re.RegisterModel ("models/objects/blaser/tris.md2");
+	re.RegisterModel ("models/objects/laser/tris.md2");
+	re.RegisterModel ("models/objects/grenade2/tris.md2");
+	re.RegisterModel ("models/weapons/v_machn/tris.md2");
+	re.RegisterModel ("models/weapons/v_handgr/tris.md2");
+	re.RegisterChainedModel ("models/weapons/v_shotg2/tris.md2", "models/weapons/v_shotg2/tris_chrome.md2");
+	re.RegisterModel ("models/objects/gibs/bone/tris.md2");
+	re.RegisterModel ("models/objects/gibs/sm_meat/tris.md2");
+	re.RegisterModel ("models/objects/gibs/bone2/tris.md2");
+	// RAFAEL
+	// re.RegisterModel ("models/objects/blaser/tris.md2");
 
-re.RegisterPic ("w_machinegun");
-re.RegisterPic ("a_bullets");
-re.RegisterPic ("i_health");
-re.RegisterPic ("a_grenades");
+	re.RegisterPic ("w_machinegun");
+	re.RegisterPic ("a_bullets");
+	re.RegisterPic ("i_health");
+	re.RegisterPic ("a_grenades");
 
 //ROGUE
 	cl_mod_explo4_big = re.RegisterModel ("models/objects/r_explode2/tris.md2");
