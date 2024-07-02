@@ -243,6 +243,10 @@ typedef struct model_s
 
 	int			extradatasize;
 	void		*extradata;
+
+	// Hint for the next model to draw with this as as an overlay.
+	struct model_s *chain_next;
+
 } model_t;
 
 //============================================================================

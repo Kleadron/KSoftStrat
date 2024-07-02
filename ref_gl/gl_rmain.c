@@ -384,20 +384,25 @@ void R_DrawEntitiesOnList (void)
 				R_DrawNullModel ();
 				continue;
 			}
-			switch (currentmodel->type)
+			while (currentmodel)
 			{
-			case mod_alias:
-				R_DrawAliasModel (currententity);
-				break;
-			case mod_brush:
-				R_DrawBrushModel (currententity);
-				break;
-			case mod_sprite:
-				R_DrawSpriteModel (currententity);
-				break;
-			default:
-				ri.Sys_Error (ERR_DROP, "Bad modeltype");
-				break;
+				switch (currentmodel->type)
+				{
+				case mod_alias:
+					R_DrawAliasModel(currententity);
+					break;
+				case mod_brush:
+					R_DrawBrushModel(currententity);
+					break;
+				case mod_sprite:
+					R_DrawSpriteModel(currententity);
+					break;
+				default:
+					ri.Sys_Error(ERR_DROP, "Bad modeltype");
+					break;
+				}
+
+				currentmodel = currentmodel->chain_next;
 			}
 		}
 	}
@@ -424,20 +429,25 @@ void R_DrawEntitiesOnList (void)
 				R_DrawNullModel ();
 				continue;
 			}
-			switch (currentmodel->type)
+			while (currentmodel)
 			{
-			case mod_alias:
-				R_DrawAliasModel (currententity);
-				break;
-			case mod_brush:
-				R_DrawBrushModel (currententity);
-				break;
-			case mod_sprite:
-				R_DrawSpriteModel (currententity);
-				break;
-			default:
-				ri.Sys_Error (ERR_DROP, "Bad modeltype");
-				break;
+				switch (currentmodel->type)
+				{
+				case mod_alias:
+					R_DrawAliasModel(currententity);
+					break;
+				case mod_brush:
+					R_DrawBrushModel(currententity);
+					break;
+				case mod_sprite:
+					R_DrawSpriteModel(currententity);
+					break;
+				default:
+					ri.Sys_Error(ERR_DROP, "Bad modeltype");
+					break;
+				}
+
+				currentmodel = currentmodel->chain_next;
 			}
 		}
 	}
@@ -2005,6 +2015,7 @@ void R_DrawBeam( entity_t *e )
 
 void	R_BeginRegistration (char *map);
 struct model_s	*R_RegisterModel (char *name);
+struct model_s	*R_RegisterChainedModel(char *name, char *nextname);
 struct image_s	*R_RegisterSkin (char *name);
 void R_SetSky (char *name, float rotate, vec3_t axis);
 void	R_EndRegistration (void);
@@ -2067,6 +2078,8 @@ refexport_t GetRefAPI (refimport_t rimp )
 
 	re.AppActivate = GLimp_AppActivate;
 	re.WindowResize = GLimp_WindowResize;
+
+	re.RegisterChainedModel = R_RegisterChainedModel;
 
 	Swap_Init ();
 

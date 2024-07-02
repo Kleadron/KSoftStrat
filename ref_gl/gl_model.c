@@ -1305,6 +1305,26 @@ struct model_s *R_RegisterModel (char *name)
 
 /*
 @@@@@@@@@@@@@@@@@@@@@
+R_RegisterChainedModel
+Loads and chains a model to another one, so the second one renders after the first.
+@@@@@@@@@@@@@@@@@@@@@
+*/
+struct model_s *R_RegisterChainedModel(char *name, char *nextname)
+{
+	model_t	*mod1 = R_RegisterModel(name);
+	model_t	*mod2 = R_RegisterModel(nextname);
+
+	if (mod1 != NULL && mod2 != NULL)
+	{
+		mod1->chain_next = mod2;
+	}
+
+	return mod1;
+}
+
+
+/*
+@@@@@@@@@@@@@@@@@@@@@
 R_EndRegistration
 
 @@@@@@@@@@@@@@@@@@@@@
