@@ -206,7 +206,7 @@ re.RegisterModel ("models/objects/laser/tris.md2");
 re.RegisterModel ("models/objects/grenade2/tris.md2");
 re.RegisterModel ("models/weapons/v_machn/tris.md2");
 re.RegisterModel ("models/weapons/v_handgr/tris.md2");
-re.RegisterModel ("models/weapons/v_shotg2/tris.md2");
+re.RegisterChainedModel ("models/weapons/v_shotg2/tris.md2", "models/weapons/v_shotg2/tris_chrome.md2");
 re.RegisterModel ("models/objects/gibs/bone/tris.md2");
 re.RegisterModel ("models/objects/gibs/sm_meat/tris.md2");
 re.RegisterModel ("models/objects/gibs/bone2/tris.md2");
