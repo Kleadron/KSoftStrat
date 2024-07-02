@@ -98,6 +98,9 @@ typedef struct image_s
 	float	sl, tl, sh, th;				// 0,0 - 1,1 unless part of the scrap
 	qboolean	scrap;
 	qboolean	has_alpha;
+	// I realized after the fact that this isn't usable for models? They only have one texture...
+	// Keeping it anyway tho. - Kleadron
+	qboolean	is_envmap;				
 
 	qboolean paletted;
 } image_t;

@@ -824,12 +824,20 @@ void R_DrawAliasModel (entity_t *e)
 	GL_Bind(skin->texnum);
 
 	// setup texture half pixel offset for old models
-	if (gl_fixmodeluvs->value)
+	if (!skin->is_envmap && gl_fixmodeluvs->value)
 	{
 		qglMatrixMode(GL_TEXTURE);
 		qglPushMatrix();
 		qglTranslatef(((1.0f / (float)skin->width)) * -0.5f, ((1.0f / (float)skin->height)) * -0.5f, 0.0f);
 		qglMatrixMode(GL_MODELVIEW);
+	}
+
+	if (skin->is_envmap)
+	{
+		qglTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+		qglTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+		qglEnable(GL_TEXTURE_GEN_S);
+		qglEnable(GL_TEXTURE_GEN_T);
 	}
 
 	// draw it
@@ -975,11 +983,17 @@ void R_DrawAliasModel (entity_t *e)
 	qglColor4f (1,1,1,1);
 
 	// turn off half pixel offset
-	if (gl_fixmodeluvs->value)
+	if (!skin->is_envmap && gl_fixmodeluvs->value)
 	{
 		qglMatrixMode(GL_TEXTURE);
 		qglPopMatrix();
 		qglMatrixMode(GL_MODELVIEW);
+	}
+
+	if (skin->is_envmap)
+	{
+		qglDisable(GL_TEXTURE_GEN_S);
+		qglDisable(GL_TEXTURE_GEN_T);
 	}
 }
 

@@ -46,6 +46,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define SHELL_WHITE_COLOR	0xD7
 
+#define ENTITY_MODEL_PRIMARY 0
+#define ENTITY_MODEL_SECONDARY 1
+#define MAX_ENTITY_MODELS 2
+
 typedef struct entity_s
 {
 	struct model_s		*model;			// opaque type outside refresh
