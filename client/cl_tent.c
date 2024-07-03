@@ -209,7 +209,9 @@ void CL_RegisterTEntModels (void)
 
 	struct model_s *v_shotg2 = re.RegisterModel("models/weapons/v_shotg2/tris.md2");
 	struct model_s *v_shotg2_chrome = re.RegisterModel("models/weapons/v_shotg2/tris_chrome.md2");
+	struct model_s *v_shotg2_flash = re.RegisterModel("models/weapons/v_shotg2/tris_flash.md2");
 	re.SetModelChain(v_shotg2, v_shotg2_chrome);
+	re.SetModelChain(v_shotg2_chrome, v_shotg2_flash);
 
 	re.RegisterModel ("models/objects/gibs/bone/tris.md2");
 	re.RegisterModel ("models/objects/gibs/sm_meat/tris.md2");

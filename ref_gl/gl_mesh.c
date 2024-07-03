@@ -151,7 +151,7 @@ interpolates between two frames and origins
 FIXME: batch lerp all vertexes
 =============
 */
-void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnormals)
+void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnormals, qboolean unlit)
 {
 	float 	l;
 	daliasframe_t	*frame, *oldframe;
@@ -239,8 +239,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnorm
 		qglVertexPointer( 3, GL_FLOAT, 16, s_lerped );	// padded for SIMD
 
 //		if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE ) )
+
+		// unlit is just a white color
+		if (unlit)
+		{
+			qglColor4f(1.0f, 1.0f, 1.0f, alpha);
+		}
 		// PMM - added double damage shell
-		if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
+		else if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
 		{
 			qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha );
 		}
@@ -336,6 +342,9 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnorm
 		{
 			qglDisableClientState(GL_NORMAL_ARRAY);
 		}
+
+		qglDisableClientState(GL_VERTEX_ARRAY);
+		qglDisableClientState(GL_COLOR_ARRAY);
 	}
 	else
 	{
@@ -355,7 +364,20 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnorm
 				qglBegin (GL_TRIANGLE_STRIP);
 			}
 
-			if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE ) )
+			if (unlit)
+			{
+				do
+				{
+					// texture coordinates come from the draw list
+					qglTexCoord2f(((float *)order)[0], ((float *)order)[1]);
+					index_xyz = order[2];
+					order += 3;
+
+					qglColor4f(1.0f, 1.0f, 1.0f, alpha);
+					qglVertex3fv(s_lerped[index_xyz]);
+				} while (--count);
+			}
+			else if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE ) )
 			{
 				do
 				{
@@ -948,7 +970,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	qglShadeModel (GL_SMOOTH);
 
-	if (!r_worldmodel->lightdata || !gl_config.mtexcombine)
+	if (!r_worldmodel->lightdata || !gl_config.mtexcombine || skin->unlit)
 	{
 		GL_TexEnv(GL_MODULATE);
 	}
@@ -996,7 +1018,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	if ( !r_lerpmodels->value || currententity->flags & RF_MUZZLEFLASH )
 		currententity->backlerp = 0;
-	GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp, skin->is_envmap);
+	GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp, skin->is_envmap, skin->unlit);
 
 	if (r_worldmodel->lightdata && gl_config.mtexcombine)
 	{

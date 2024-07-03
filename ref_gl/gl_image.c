@@ -1563,6 +1563,8 @@ qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 
 		return GL_Upload32 (trans, width, height, mipmap);
 	}
+
+	return false;
 }
 
 
@@ -1602,6 +1604,10 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 	image->height = height;
 	image->type = type;
 
+	// names must have MATCHING full caps and underscore, tho technically anywhere works
+	image->is_envmap = (strstr(name, "ENV_") != NULL);
+	image->unlit = (strstr(name, "UNL_") != NULL);
+
 	if (type == it_skin && bits == 8)
 		R_FloodFillSkin(pic, width, height);
 
@@ -1626,7 +1632,6 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 		image->texnum = TEXNUM_SCRAPS + texnum;
 		image->scrap = true;
 		image->has_alpha = true;
-		image->is_envmap = (strstr(name, "CHROME_") != NULL);
 		image->sl = (x+0.01)/(float)BLOCK_WIDTH;
 		image->sh = (x+image->width-0.01)/(float)BLOCK_WIDTH;
 		image->tl = (y+0.01)/(float)BLOCK_WIDTH;
@@ -1642,7 +1647,6 @@ nonscrap:
 			image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
 		else
 			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
-		image->is_envmap = (strstr(name, "CHROME_") != NULL);
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
 		image->paletted = uploaded_paletted;
