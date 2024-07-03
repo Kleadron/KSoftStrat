@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2024 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -245,7 +246,10 @@ typedef struct model_s
 	void		*extradata;
 
 	// Hint for the next model to draw with this as as an overlay.
-	struct model_s *chain_next;
+	struct model_s	*chain_next;
+
+	// HD model handling - 16-bit vertices
+	qboolean		is_hd;
 
 } model_t;
 

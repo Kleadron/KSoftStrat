@@ -1,6 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
-Copyright (C) 2022 Kleadron Software
+Copyright (C) 2024 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -2015,7 +2015,7 @@ void R_DrawBeam( entity_t *e )
 
 void	R_BeginRegistration (char *map);
 struct model_s	*R_RegisterModel (char *name);
-struct model_s	*R_RegisterChainedModel(char *name, char *nextname);
+void	*R_SetModelChain(struct model_s *model, struct model_s *chain_next);
 struct image_s	*R_RegisterSkin (char *name);
 void R_SetSky (char *name, float rotate, vec3_t axis);
 void	R_EndRegistration (void);
@@ -2079,7 +2079,7 @@ refexport_t GetRefAPI (refimport_t rimp )
 	re.AppActivate = GLimp_AppActivate;
 	re.WindowResize = GLimp_WindowResize;
 
-	re.RegisterChainedModel = R_RegisterChainedModel;
+	re.SetModelChain = R_SetModelChain;
 
 	Swap_Init ();
 

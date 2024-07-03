@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2024 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -185,7 +186,8 @@ typedef struct
 
 	// new
 	void	(*WindowResize) (int width, int height);
-	struct model_s *(*RegisterChainedModel) (char *name, char *nextname);
+	// Specify a model to get drawn after "model" via "chain_next". No limit
+	struct model_s *(*SetModelChain) (struct model_s *model, struct model_s *chain_next);
 
 } refexport_t;
 

@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2024 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -1309,17 +1310,12 @@ R_RegisterChainedModel
 Loads and chains a model to another one, so the second one renders after the first.
 @@@@@@@@@@@@@@@@@@@@@
 */
-struct model_s *R_RegisterChainedModel(char *name, char *nextname)
+void R_SetModelChain(struct model_s *model, struct model_s *chain_next)
 {
-	model_t	*mod1 = R_RegisterModel(name);
-	model_t	*mod2 = R_RegisterModel(nextname);
-
-	if (mod1 != NULL && mod2 != NULL)
+	if (model != NULL)
 	{
-		mod1->chain_next = mod2;
+		model->chain_next = chain_next;
 	}
-
-	return mod1;
 }
 
 

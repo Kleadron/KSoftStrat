@@ -1,6 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
-Copyright (C) 2022 Kleadron Software
+Copyright (C) 2022-2024 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -206,7 +206,11 @@ void CL_RegisterTEntModels (void)
 	re.RegisterModel ("models/objects/grenade2/tris.md2");
 	re.RegisterModel ("models/weapons/v_machn/tris.md2");
 	re.RegisterModel ("models/weapons/v_handgr/tris.md2");
-	re.RegisterChainedModel ("models/weapons/v_shotg2/tris.md2", "models/weapons/v_shotg2/tris_chrome.md2");
+
+	struct model_s *v_shotg2 = re.RegisterModel("models/weapons/v_shotg2/tris.md2");
+	struct model_s *v_shotg2_chrome = re.RegisterModel("models/weapons/v_shotg2/tris_chrome.md2");
+	re.SetModelChain(v_shotg2, v_shotg2_chrome);
+
 	re.RegisterModel ("models/objects/gibs/bone/tris.md2");
 	re.RegisterModel ("models/objects/gibs/sm_meat/tris.md2");
 	re.RegisterModel ("models/objects/gibs/bone2/tris.md2");
