@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2024 Kleadron Software
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -75,6 +76,40 @@ void GL_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 			lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
 			lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
 			lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
+		}
+	}
+
+}
+
+void GL_LerpVerts_HD(int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3])
+{
+	int i;
+
+	// these are fractional values apparently
+	byte *v16 = (byte*)(((byte*)v) + (nverts * 4));
+	byte *ov16 = (byte*)(((byte*)ov) + (nverts * 4));
+	// fractional scale
+	float s = 1.0f / 256.0f;
+
+	//PMM -- added RF_SHELL_DOUBLE, RF_SHELL_HALF_DAM
+	if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
+	{
+		for (i = 0; i < nverts; i++, v++, ov++, v16+=3, ov16+=3, lerp += 4)
+		{
+			float *normal = r_avertexnormals[verts[i].lightnormalindex];
+
+			lerp[0] = move[0] + ((float)ov->v[0] + (float)ov16[0] * s) * backv[0] + ((float)v->v[0] + (float)v16[0] * s) * frontv[0] + normal[0] * POWERSUIT_SCALE;
+			lerp[1] = move[1] + ((float)ov->v[1] + (float)ov16[1] * s) * backv[1] + ((float)v->v[1] + (float)v16[1] * s) * frontv[1] + normal[1] * POWERSUIT_SCALE;
+			lerp[2] = move[2] + ((float)ov->v[2] + (float)ov16[2] * s) * backv[2] + ((float)v->v[2] + (float)v16[2] * s) * frontv[2] + normal[2] * POWERSUIT_SCALE;
+		}
+	}
+	else
+	{
+		for (i = 0; i < nverts; i++, v++, ov++, v16 += 3, ov16 += 3, lerp += 4)
+		{
+			lerp[0] = move[0] + ((float)ov->v[0] + (float)ov16[0] * s) * backv[0] + ((float)v->v[0] + (float)v16[0] * s) * frontv[0];
+			lerp[1] = move[1] + ((float)ov->v[1] + (float)ov16[1] * s) * backv[1] + ((float)v->v[1] + (float)v16[1] * s) * frontv[1];
+			lerp[2] = move[2] + ((float)ov->v[2] + (float)ov16[2] * s) * backv[2] + ((float)v->v[2] + (float)v16[2] * s) * frontv[2];
 		}
 	}
 
@@ -171,10 +206,10 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnorm
 		move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
 	}
 
-	for (i=0 ; i<3 ; i++)
+	for (i = 0; i < 3; i++)
 	{
-		frontv[i] = frontlerp*frame->scale[i];
-		backv[i] = backlerp*oldframe->scale[i];
+		frontv[i] = frontlerp * frame->scale[i];
+		backv[i] = backlerp * oldframe->scale[i];
 	}
 
 	lerp = s_lerped[0];
@@ -185,7 +220,15 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp, qboolean calcnorm
 		GL_LerpNormals(paliashdr->num_xyz, v, ov, verts, lerpnormals, frontlerp, backlerp);
 	}
 
-	GL_LerpVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv );
+	if (currentmodel->is_hd)
+	{
+		GL_LerpVerts_HD(paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
+	}
+	else
+	{
+		GL_LerpVerts(paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
+	}
+	
 
 	if ( gl_vertex_arrays->value )
 	{

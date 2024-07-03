@@ -1131,6 +1131,10 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 //
 // load the frames
 //
+	// hd model vertices is hacky bullshit, this sucks
+	qboolean is_hd = pheader->framesize == (40 + pheader->num_xyz * 4 + pheader->num_xyz * 3);
+	mod->is_hd = is_hd;
+
 	for (i=0 ; i<pheader->num_frames ; i++)
 	{
 		pinframe = (daliasframe_t *) ((byte *)pinmodel 
@@ -1145,9 +1149,17 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 			poutframe->translate[j] = LittleFloat (pinframe->translate[j]);
 		}
 		// verts are all 8 bit, so no swapping needed
-		memcpy (poutframe->verts, pinframe->verts, 
-			pheader->num_xyz*sizeof(dtrivertx_t));
-
+		if (is_hd)
+		{
+			// copy 
+			memcpy(poutframe->verts, pinframe->verts,
+				(pheader->num_xyz * sizeof(dtrivertx_t)) + (pheader->num_xyz * 3));
+		}
+		else
+		{
+			memcpy(poutframe->verts, pinframe->verts,
+				pheader->num_xyz * sizeof(dtrivertx_t));
+		}
 	}
 
 	mod->type = mod_alias;
