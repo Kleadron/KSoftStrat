@@ -1,4 +1,19 @@
+KLEADRON SOFTWARE QUAKE 2 BRANCH
+================================
+This is a modified source repository of Quake 2 and idTech 2 for KSoft (Kleadron Software) games.
+All code is still under the original GNU GPL v2 license, including added KSoft code.
+You're fine to take whatever I wrote here (as per the license) and use it in your own Quake 2 mod, 
+but I would appreciate credit if it's substantial.
 
+All original assets in the ksoft/ and ksoft_source_assets/ directories are NOT GPL or public domain. 
+Count them as "All Rights Reserved".
+This means you cannot use my mod content for your own mod without explicit permission. 
+This is the same terms as the original game, if you want to distribute a mod that doesn't use this
+repository's assets then you will need to make your own.
+
+
+ORIGINAL README
+===============
 This is the complete source code for Quake 2, version 3.21, buildable with
 visual C++ 6.0.  The linux version should be buildable, but we haven't
 tested it for the release.
