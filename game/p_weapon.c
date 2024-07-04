@@ -466,6 +466,11 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 				// disable lerp on the first frame by default (may be undesirable for certain weapons but you can override this easily)
 				ent->client->ps.gunflashframes = 1;
 
+				if (ent->client->quad_framenum > level.framenum)
+					gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
+
+				fire (ent);
+
 				// start the animation
 				ent->client->anim_priority = ANIM_ATTACK;
 				if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -514,21 +519,27 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		}
 	}
 
+	// Weapon is in firing state
 	if (ent->client->weaponstate == WEAPON_FIRING)
 	{
-		for (n = 0; fire_frames[n]; n++)
-		{
-			if (ent->client->ps.gunframe == fire_frames[n])
-			{
-				if (ent->client->quad_framenum > level.framenum)
-					gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
+		//// Check the firing frames specified by the weapon code.
+		//for (n = 0; fire_frames[n]; n++)
+		//{
+		//	// If the current animation frame is a firing frame then schuut
+		//	if (ent->client->ps.gunframe == fire_frames[n])
+		//	{
+		//		if (ent->client->quad_framenum > level.framenum)
+		//			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
 
-				fire (ent);
-				break;
-			}
-		}
+		//		fire (ent);
+		//		break;
+		//	}
+		//}
 
-		if (!fire_frames[n])
+		// Apparently the fire function should increment the gun frame. This causes the animation to look really funny.
+		//if (!fire_frames[n])
+		//	ent->client->ps.gunframe++;
+		if (ent->client->ps.gunflashframes == 0)
 			ent->client->ps.gunframe++;
 
 		if (ent->client->ps.gunframe == FRAME_IDLE_FIRST+1)
@@ -1271,7 +1282,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 	int			damage = 6;
 	int			kick = 12;
 
-	ent->client->ps.gunflashframes = 1;
+	//ent->client->ps.gunflashframes = 1;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1303,7 +1314,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 	gi.WriteByte (MZ_SSHOTGUN | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-	ent->client->ps.gunframe++;
+	//ent->client->ps.gunframe++;
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
@@ -1315,7 +1326,7 @@ void Weapon_SuperShotgun (edict_t *ent)
 	static int	pause_frames[]	= {29, 42, 57, 0};
 	static int	fire_frames[]	= {7, 0};
 
-	Weapon_Generic (ent, 5, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
+	Weapon_Generic (ent, 6, 17, 57, 61, pause_frames, fire_frames, weapon_supershotgun_fire);
 }
 
 
