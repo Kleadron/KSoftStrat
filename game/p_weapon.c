@@ -449,10 +449,6 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		return;
 	}
 
-	// allow lerping when not firing
-	if (ent->client->ps.gunflashframes > 0)
-		ent->client->ps.gunflashframes--;
-
 	if (ent->client->weaponstate == WEAPON_READY)
 	{
 		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
@@ -541,6 +537,8 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		//	ent->client->ps.gunframe++;
 		if (ent->client->ps.gunflashframes == 0)
 			ent->client->ps.gunframe++;
+		else
+			ent->client->ps.gunflashframes--;
 
 		if (ent->client->ps.gunframe == FRAME_IDLE_FIRST+1)
 			ent->client->weaponstate = WEAPON_READY;
